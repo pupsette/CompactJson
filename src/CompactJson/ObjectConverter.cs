@@ -34,10 +34,19 @@ namespace CompactJson
                 if (att.ConverterType == null)
                     throw new Exception($"{nameof(CustomConverterAttribute.ConverterType)} must not be null in {nameof(CustomConverterAttribute)} for member {memberInfo.Name} of type {memberInfo.ReflectedType}.");
 
-                if (!typeof(IConverter).IsAssignableFrom(att.ConverterType))
-                    throw new Exception($"{att.ConverterType} must implement {nameof(IConverter)} when used in {nameof(CustomConverterAttribute)}.");
+                IConverter converter = null;
+                if (typeof(IConverter).IsAssignableFrom(att.ConverterType))
+                    converter = (IConverter)GetConstructor(att.ConverterType)();
+                else if (typeof(IConverterFactory).IsAssignableFrom(att.ConverterType))
+                {
+                    IConverterFactory factory = (IConverterFactory)GetConstructor(att.ConverterType)();
+                    converter = factory.Create(propertyType);
+                    if (converter == null)
+                        throw new Exception($"{nameof(IConverterFactory.Create)} implementation of {factory.GetType()} did not return a converter for type {propertyType}.");
+                }
+                else
+                    throw new Exception($"{att.ConverterType} must implement either {nameof(IConverter)} or {nameof(IConverterFactory)} when used in {nameof(CustomConverterAttribute)}.");
 
-                IConverter converter = (IConverter)GetConstructor(att.ConverterType)();
                 mProps.Add(memberInfo.Name, new PropInfo
                 {
                     Name = memberInfo.Name,

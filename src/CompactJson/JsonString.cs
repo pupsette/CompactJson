@@ -1,14 +1,23 @@
 ﻿using System;
-using System.IO;
 using System.Text;
 
 namespace CompactJson
 {
+    /// <summary>
+    /// A class representing a JSON string within the
+    /// generic JSON object model.
+    /// </summary>
 #if COMPACTJSON_PUBLIC
     public
+#else
+    internal
 #endif
     class JsonString : JsonValue
     {
+        /// <summary>
+        /// Constructs a JSON string value.
+        /// </summary>
+        /// <param name="value">The string. This must not be null.</param>
         public JsonString(string value)
         {
             if (value == null)
@@ -16,13 +25,26 @@ namespace CompactJson
             Value = value;
         }
 
+        /// <summary>
+        /// The string contents of this JSON string.
+        /// </summary>
         public string Value { get; }
 
+        /// <summary>
+        /// Writes the string contents to the given <see cref="IJsonConsumer"/>.
+        /// </summary>
+        /// <param name="consumer">The consumer.</param>
         public override void Write(IJsonConsumer consumer)
         {
             consumer.String(Value);
         }
 
+        /// <summary>
+        /// Escapes the given string according to the JSON specification. This will
+        /// also add double quotes at start and end. The given string must not be null.
+        /// </summary>
+        /// <param name="s">The string to escape.</param>
+        /// <returns>The escaped string including double quotes.</returns>
         public static string Escape(string s)
         {
             StringBuilder sb = new StringBuilder(s.Length + 5);
@@ -30,6 +52,12 @@ namespace CompactJson
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Escapes the given string according to the JSON specification. This will
+        /// also add double quotes at start and end. The given string must not be null.
+        /// </summary>
+        /// <param name="s">The string to escape.</param>
+        /// <param name="sb">An existing string builder to write the escaped string to.</param>
         public static void Escape(string s, StringBuilder sb)
         {
             sb.Append('"');

@@ -6,13 +6,13 @@ namespace CompactJson
 #if COMPACTJSON_PUBLIC
     public
 #endif
-    class EnumConverter : JsonValueConverter
+    class EnumConverter : ConverterBase
     {
         private readonly Dictionary<string, object> mStringToEnumValue = new Dictionary<string, object>();
         private readonly Dictionary<object, string> mEnumValueToString = new Dictionary<object, string>();
 
         public EnumConverter(Type enumType)
-            : base(enumType, allowJsonString: true)
+            : base(enumType)
         {
             foreach (object enumValue in enumType.GetEnumValues())
             {

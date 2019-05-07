@@ -93,9 +93,11 @@ namespace CompactJson
         /// in order to convert it to a JSON string or to any other representation of
         /// JSON data.
         /// </summary>
-        /// <param name="value">The .NET object.</param>
-        /// <param name="writer">The JSON consumer which must be used to write the data
-        /// to.</param>
+        /// <param name="value">The .NET object to write. Implementors may assume
+        /// that the type of the incoming value can be cast to the target type 
+        /// of this converter, however, it may be null.</param>
+        /// <param name="writer">The JSON consumer which must be used to write 
+        /// the data to according to the contents of the given value.</param>
         void Write(object value, IJsonConsumer writer);
     }
 }
