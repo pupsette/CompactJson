@@ -18,7 +18,21 @@ namespace CompactJson
                 throw new Exception($"{nameof(DictionaryConverter)} cannot convert values of type '{type}'. The keys must be strings.");
 
             Type specializedConverterType = typeof(SpecializedDictionaryConverter<>).MakeGenericType(genericTypes[1]);
-            return (ConverterBase)Activator.CreateInstance(specializedConverterType, new object[] { ConverterRegistry.Get(genericTypes[1]) });
+            return (ConverterBase)Activator.CreateInstance(specializedConverterType, new object[] { GetValueConverter(genericTypes[1]) });
+        }
+
+        /// <summary>
+        /// Virtual method for retrieving an instance of <see cref="IConverter"/> for
+        /// converting the values of the dictionary. The default implementation uses the
+        /// <see cref="ConverterRegistry"/> to obtain a type-specific converter. You may
+        /// override this in deriving classes in order to change the behavior.
+        /// </summary>
+        /// <param name="dictionaryValueType">The type of the dictionary values.</param>
+        /// <returns>An instance of <see cref="IConverter"/> for converting
+        /// the values of the dictionary.</returns>
+        protected virtual IConverter GetValueConverter(Type dictionaryValueType)
+        {
+            return ConverterRegistry.Get(dictionaryValueType);
         }
 
         private class SpecializedDictionaryConverter<T> : ConverterBase
