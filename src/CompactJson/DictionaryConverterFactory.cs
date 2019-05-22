@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace CompactJson
 {
@@ -8,7 +7,7 @@ namespace CompactJson
     {
         public bool CanConvert(Type type)
         {
-            if (type.IsGenericType)
+            if (!type.IsGenericType)
                 return false;
             Type genericTypeDef = type.GetGenericTypeDefinition();
             return genericTypeDef == typeof(Dictionary<,>) && genericTypeDef.GetGenericArguments()[0] == typeof(string);
@@ -20,7 +19,7 @@ namespace CompactJson
             if (genericTypeDef != typeof(Dictionary<,>))
                 throw new ArgumentException($"Type '{type}' was expected to be a generic Dictionary<,>.");
 
-            Type[] genericArguments = genericTypeDef.GetGenericArguments();
+            Type[] genericArguments = type.GetGenericArguments();
             if (genericArguments[0] != typeof(string))
                 throw new ArgumentException($"Type '{type}' was expected to have string keys.");
 

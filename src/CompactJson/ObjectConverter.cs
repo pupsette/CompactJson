@@ -26,10 +26,8 @@ namespace CompactJson
 
         private void AddProperty(MemberInfo memberInfo, Func<object, object> getter, Action<object, object> setter, Type propertyType)
         {
-            IConverterFactory factory = null;
             Type converterType = CustomConverterAttribute.GetConverterType(memberInfo);
-            if (converterType != null)
-                factory = ConverterFactoryHelper.FromType(converterType);
+            IConverterFactory factory = ConverterFactoryHelper.FromType(converterType);
 
             ConverterParameters parameters = ConverterParameters.Reflect(memberInfo);
             IConverter converter = ConverterFactoryHelper.CreateConverter(factory, propertyType, parameters);
@@ -43,7 +41,6 @@ namespace CompactJson
                 DefaultValue = GetDefaultValue(propertyType),
                 EmitDefaultValue = EmitDefaultValue(memberInfo)
             });
-            return;
         }
 
         private object GetDefaultValue(Type type)

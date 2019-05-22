@@ -30,7 +30,15 @@ namespace CompactJson
 
                 CURRENTLY_REFLECTED_TYPES[type] = converter = new ObjectConverter(type);
             }
-            converter.Reflect();
+            try
+            {
+                converter.Reflect();
+            }
+            finally
+            {
+                lock (CURRENTLY_REFLECTED_TYPES)
+                    CURRENTLY_REFLECTED_TYPES.Remove(type);
+            }
             return converter;
         }
     }

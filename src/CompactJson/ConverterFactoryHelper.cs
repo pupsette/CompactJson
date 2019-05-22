@@ -24,6 +24,9 @@ namespace CompactJson
 
         public static IConverterFactory FromType(Type converterOrFactoryType)
         {
+            if (converterOrFactoryType == null)
+                return null;
+
             if (typeof(IConverter).IsAssignableFrom(converterOrFactoryType))
                 return new FixedConverterFactory((IConverter)Instantiate(converterOrFactoryType));
 
@@ -44,7 +47,7 @@ namespace CompactJson
 
             public bool CanConvert(Type type)
             {
-                return converter.Type == type;
+                return converter.Type == null || converter.Type == type;
             }
 
             public IConverter Create(Type type, ConverterParameters parameters)

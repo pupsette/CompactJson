@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace CompactJson
 {
@@ -17,10 +16,10 @@ namespace CompactJson
             if (genericTypeDef != typeof(List<>))
                 throw new ArgumentException($"Type '{type}' was expected to be a generic List<>.");
 
-            Type elementType = genericTypeDef.GetGenericArguments()[0];
+            Type elementType = type.GetGenericArguments()[0];
             Type listConverterType = typeof(ListConverter<>).MakeGenericType(elementType);
             IConverter elementConverter = ConverterFactoryHelper.CreateConverter(converterParameters?.ElementConverterFactory, elementType, null);
-            return (IConverter)Activator.CreateInstance(listConverterType, elementConverter);
+            return (IConverter)Activator.CreateInstance(listConverterType, new object[] { elementConverter });
         }
     }
 }
