@@ -2,31 +2,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq.Expressions;
 
 namespace CompactJson
 {
 #if COMPACTJSON_PUBLIC
     public
+#else
+    internal
 #endif
-    class ListConverter : ConverterBase
+    class ListConverter<T> : CollectionConverterBase
     {
-        private readonly Func<Action<object>, IJsonArrayConsumer> mConsumerFactory;
-        private readonly IConverter mItemConverter;
-
-        public ListConverter(Type type, IConverter itemConverter, bool outputArray) : base(type)
+        public ListConverter(IConverter elementConverter) : base(typeof(List<T>), elementConverter)
         {
-            this.mItemConverter = itemConverter;
-
-            Type consumerType = typeof(Consumer<>).MakeGenericType(itemConverter.Type);
-            System.Reflection.ConstructorInfo consumerConstructor = consumerType.GetConstructor(new[] { typeof(IConverter), typeof(bool), typeof(Action<object>) });
-
-            ParameterExpression whenDoneParameter = Expression.Parameter(typeof(Action<object>), "whenDone");
-            ConstantExpression converterParameter = Expression.Constant(itemConverter, typeof(IConverter));
-            ConstantExpression outputArrayParameter = Expression.Constant(outputArray, typeof(bool));
-            Expression newExpression = Expression.New(consumerConstructor, converterParameter, outputArrayParameter, whenDoneParameter);
-
-            this.mConsumerFactory = Expression.Lambda<Func<Action<object>, IJsonArrayConsumer>>(newExpression, whenDoneParameter).Compile();
         }
 
         public override object FromNull()
@@ -36,21 +23,22 @@ namespace CompactJson
 
         public override IJsonArrayConsumer FromArray(Action<object> whenDone)
         {
-            return mConsumerFactory(whenDone);
+            return new Consumer(ElementConverter, whenDone);
         }
 
-        private class Consumer<T> : IJsonArrayConsumer
+        #region NESTED CONSUMER CLASS
+
+        internal class Consumer : IJsonArrayConsumer
         {
             private readonly IConverter mElementConverter;
             private readonly bool mOutputArray;
             private readonly List<T> mList;
-            private readonly Action<object> mWhenDone;
+            private readonly Action<List<T>> mWhenDone;
 
-            public Consumer(IConverter elementConverter, bool outputArray, Action<object> whenDone)
+            public Consumer(IConverter elementConverter, Action<List<T>> whenDone)
             {
                 Debug.Assert(elementConverter.Type == typeof(T));
                 this.mElementConverter = elementConverter;
-                this.mOutputArray = outputArray;
                 this.mList = new List<T>();
                 this.mWhenDone = whenDone;
             }
@@ -67,10 +55,7 @@ namespace CompactJson
 
             public void Done()
             {
-                if (mOutputArray)
-                    mWhenDone(mList.ToArray());
-                else
-                    mWhenDone(mList);
+                mWhenDone(mList);
             }
 
             public void Null()
@@ -99,13 +84,6 @@ namespace CompactJson
             }
         }
 
-        public override void Write(object value, IJsonConsumer writer)
-        {
-            var arrayConsumer = writer.Array();
-            IList list = (IList)value; // Array and List<> implement IList
-            for (int i = 0; i < list.Count; i++)
-                mItemConverter.Write(list[i], arrayConsumer);
-            arrayConsumer.Done();
-        }
+        #endregion
     }
 }

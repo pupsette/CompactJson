@@ -6,10 +6,7 @@ using System.Reflection;
 
 namespace CompactJson
 {
-//#if COMPACTJSON_PUBLIC
-//    public
-//#endif
-    class ObjectConverter : ConverterBase
+    internal class ObjectConverter : ConverterBase
     {
         internal struct PropInfo
         {
@@ -25,81 +22,28 @@ namespace CompactJson
         private PropInfo[] mPropList;
         private Func<object> mConstructor;
 
+        private static readonly Dictionary<Type, ObjectConverter> CURRENTLY_REFLECTED_TYPES = new Dictionary<Type, ObjectConverter>();
+
         private void AddProperty(MemberInfo memberInfo, Func<object, object> getter, Action<object, object> setter, Type propertyType)
         {
-            Attribute customConverterAttribute = Attribute.GetCustomAttribute(memberInfo, typeof(CustomConverterAttribute), true);
-            if (customConverterAttribute != null)
-            {
-                CustomConverterAttribute att = (CustomConverterAttribute)customConverterAttribute;
-                if (att.ConverterType == null)
-                    throw new Exception($"{nameof(CustomConverterAttribute.ConverterType)} must not be null in {nameof(CustomConverterAttribute)} for member {memberInfo.Name} of type {memberInfo.ReflectedType}.");
+            IConverterFactory factory = null;
+            Type converterType = CustomConverterAttribute.GetConverterType(memberInfo);
+            if (converterType != null)
+                factory = ConverterFactoryHelper.FromType(converterType);
 
-                IConverter converter = null;
-                if (typeof(IConverter).IsAssignableFrom(att.ConverterType))
-                    converter = (IConverter)GetConstructor(att.ConverterType)();
-                else if (typeof(IConverterFactory).IsAssignableFrom(att.ConverterType))
-                {
-                    IConverterFactory factory = (IConverterFactory)GetConstructor(att.ConverterType)();
-                    converter = factory.Create(propertyType);
-                    if (converter == null)
-                        throw new Exception($"{nameof(IConverterFactory.Create)} implementation of {factory.GetType()} did not return a converter for type {propertyType}.");
-                }
-                else
-                    throw new Exception($"{att.ConverterType} must implement either {nameof(IConverter)} or {nameof(IConverterFactory)} when used in {nameof(CustomConverterAttribute)}.");
-
-                mProps.Add(memberInfo.Name, new PropInfo
-                {
-                    Name = memberInfo.Name,
-                    Setter = setter,
-                    Getter = getter,
-                    Converter = converter,
-                    DefaultValue = GetDefaultValue(propertyType),
-                    EmitDefaultValue = EmitDefaultValue(memberInfo)
-                });
-                return;
-            }
-
-            Attribute[] attributes = Attribute.GetCustomAttributes(memberInfo, typeof(MultiTypePropertyAttribute), true);
-            if (attributes != null && attributes.Length > 0)
-            {
-                foreach (MultiTypePropertyAttribute attr in attributes)
-                {
-                    if (attr.ObjectType == null)
-                        throw new Exception($"MultiTypePropertyAttribute on {memberInfo.Name} of {memberInfo.DeclaringType} must have a valid ObjectType set (was null).");
-                    if (attr.PropertyName == null)
-                        throw new Exception($"MultiTypePropertyAttribute on {memberInfo.Name} of {memberInfo.DeclaringType} must have a valid PropertyName set (was null).");
-                    if (!propertyType.IsAssignableFrom(attr.ObjectType))
-                        throw new Exception($"Type {attr.ObjectType} of MultiTypePropertyAttribute on {memberInfo.Name} of {memberInfo.DeclaringType} cannot be cast to {propertyType}.");
-                    if (EmitDefaultValue(memberInfo))
-                        throw new Exception($"EmitDefaultValueAttribute cannot be used in conjunction with MultiTypePropertyAttribute on {memberInfo.Name} of {memberInfo.DeclaringType}.");
-
-                    mProps.Add(attr.PropertyName, new PropInfo
-                    {
-                        Name = attr.PropertyName,
-                        Setter = setter,
-                        Getter = instance => {
-                            object val = getter(instance);
-                            if (val != null && val.GetType() == attr.ObjectType)
-                                return val;
-                            return null;
-                        },
-                        Converter = ConverterRegistry.Get(attr.ObjectType),
-                        DefaultValue = null,
-                        EmitDefaultValue = false
-                    });
-                }
-                return;
-            }
+            ConverterParameters parameters = ConverterParameters.Reflect(memberInfo);
+            IConverter converter = ConverterFactoryHelper.CreateConverter(factory, propertyType, parameters);
 
             mProps.Add(memberInfo.Name, new PropInfo
             {
                 Name = memberInfo.Name,
                 Setter = setter,
                 Getter = getter,
-                Converter = ConverterRegistry.Get(propertyType),
+                Converter = converter,
                 DefaultValue = GetDefaultValue(propertyType),
                 EmitDefaultValue = EmitDefaultValue(memberInfo)
             });
+            return;
         }
 
         private object GetDefaultValue(Type type)
@@ -126,7 +70,7 @@ namespace CompactJson
             mConstructor = GetConstructor(Type);
         }
 
-        private Func<object> GetConstructor(Type objtype)
+        private static Func<object> GetConstructor(Type objtype)
         {
             try
             {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 
 namespace CompactJson
 {
@@ -30,6 +31,14 @@ namespace CompactJson
             AddConverter(new JsonValueConverter(typeof(JsonNumber), allowJsonFloat: true, allowJsonLong: true));
             AddConverter(new JsonValueConverter(typeof(JsonBoolean), allowJsonBoolean: true));
             AddConverter(new JsonValueConverter(typeof(JsonString), allowJsonString: true, acceptNull: true));
+
+            AddConverterFactory(new ListConverterFactory());
+            AddConverterFactory(new ArrayConverterFactory());
+            AddConverterFactory(new DictionaryConverterFactory());
+            AddConverterFactory(new EnumConverterFactory());
+
+            // fallback converter factory
+            OBJECT_CONVERTER_FACTORY = new ObjectConverterFactory();
         }
 
         /// <summary>
@@ -38,48 +47,68 @@ namespace CompactJson
         /// <param name="converter">The converter to add.</param>
         public static void AddConverter(IConverter converter)
         {
-            lock (TYPES)
-                TYPES.Add(converter.Type, converter);
+            lock (CONVERTERS)
+                CONVERTERS.Add(converter.Type, converter);
         }
 
-        private static readonly Dictionary<Type, IConverter> TYPES = new Dictionary<Type, IConverter>();
+        /// <summary>
+        /// Adds a <see cref="IConverterFactory"/> which is asked to convert types
+        /// which are new to the <see cref="ConverterRegistry"/>.
+        /// 
+        /// If a type can be handled by multiple converter factories, the factory which
+        /// has been added first, will be used to create a converter for the type.
+        /// </summary>
+        /// <param name="converterFactory">The converter factory to add.</param>
+        public static void AddConverterFactory(IConverterFactory converterFactory)
+        {
+            lock (FACTORIES)
+                FACTORIES.Add(converterFactory);
+        }
+
+        private static readonly Dictionary<Type, IConverter> CONVERTERS = new Dictionary<Type, IConverter>();
+        private static readonly List<IConverterFactory> FACTORIES = new List<IConverterFactory>();
+        private static readonly IConverterFactory OBJECT_CONVERTER_FACTORY;
 
         public static IConverter Get(Type type)
         {
-            lock (TYPES)
+            return Get(type, null);
+        }
+
+        private static string GetMemberNameString(MemberInfo memberInfo)
+        {
+            if (memberInfo == null)
+                return "";
+
+            return " of member '" + memberInfo.Name + "' of class " + memberInfo.DeclaringType.Name;
+        }
+
+        public static IConverter Get(Type type, ConverterParameters converterParameters)
+        {
+            lock (CONVERTERS)
             {
                 IConverter converter;
-                if (TYPES.TryGetValue(type, out converter))
+                if (converterParameters == null && CONVERTERS.TryGetValue(type, out converter))
                     return converter;
 
-                if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>))
-                {
-                    Type elementType = type.GetGenericArguments()[0];
-                    converter = new ListConverter(type, Get(elementType), false);
-                    TYPES[type] = converter;
-                }
-                else if (type.IsEnum)
-                {
-                    converter = new EnumConverter(type);
-                    TYPES[type] = converter;
-                }
-                else if (type.IsArray)
-                {
-                    Type elementType = type.GetElementType();
-                    converter = new ListConverter(type, Get(elementType), true);
-                    TYPES[type] = converter;
-                }
-                else if (type.IsClass || (type.IsValueType && !type.IsPrimitive))
-                {
-                    ObjectConverter result = new ObjectConverter(type);
-                    TYPES[type] = converter = result;
-                    result.Reflect();
-                }
-                else
-                    throw new Exception($"Unsupported model type '{type}'.");
-
+                converter = CreateConverter(type, converterParameters);
+                if (converterParameters == null)
+                    CONVERTERS[type] = converter;
                 return converter;
             }
+        }
+
+        private static IConverter CreateConverter(Type type, ConverterParameters converterParameters)
+        {
+            for (int i = 0; i < FACTORIES.Count; i++)
+            {
+                if (FACTORIES[i].CanConvert(type))
+                    return FACTORIES[i].Create(type, converterParameters);
+            }
+
+            if (OBJECT_CONVERTER_FACTORY.CanConvert(type))
+                return OBJECT_CONVERTER_FACTORY.Create(type, converterParameters);
+
+            throw new Exception($"Unsupported model type '{type}'.");
         }
     }
 }
