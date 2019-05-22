@@ -3,6 +3,13 @@ using System.Collections;
 
 namespace CompactJson
 {
+    /// <summary>
+    /// A base class for converters which are capable of converting
+    /// collections. It provides the ElementConveter property and
+    /// an implementation of the <see cref="Write(object, IJsonConsumer)"/>
+    /// method which writes a JSON array while expecting the given object
+    /// to be <see cref="IEnumerable"/>.
+    /// </summary>
 #if COMPACTJSON_PUBLIC
     public
 #else
@@ -10,6 +17,9 @@ namespace CompactJson
 #endif
     abstract class CollectionConverterBase : ConverterBase
     {
+        /// <summary>
+        /// The converter to be used for the elements of the collection. This cannot be null.
+        /// </summary>
         public IConverter ElementConverter { get; }
 
         /// <summary>
@@ -29,28 +39,15 @@ namespace CompactJson
         }
 
         /// <summary>
-        /// Compares two converters for equality. It is used to avoid creation of
-        /// converters for the same type.
+        /// Writes data of the .NET object to the given <see cref="IJsonConsumer"/>
+        /// in order to convert it to a JSON string or to any other representation of
+        /// JSON data. This implementation expects <paramref name="value"/> to implement
+        /// <see cref="IEnumerable"/> and creates a JSON array from it. The <paramref name="value"/>
+        /// may be null, though.
         /// </summary>
-        /// <returns>true, if the converters are equal; false, otherwise.</returns>
-        public override bool Equals(object obj)
-        {
-            if (!base.Equals(obj))
-                return false;
-
-            return object.Equals(((CollectionConverterBase)obj).ElementConverter, ElementConverter);
-        }
-
-        /// <summary>
-        /// Calculates a hash code for this converter. It is used to avoid creation of
-        /// converters for the same type.
-        /// </summary>
-        /// <returns>The hash code.</returns>
-        public override int GetHashCode()
-        {
-            return Type.GetHashCode() * 17 + ElementConverter.GetHashCode();
-        }
-
+        /// <param name="value">The .NET object to write. It may be null or an instance of
+        /// <see cref="IEnumerable"/>.</param>
+        /// <param name="writer">The JSON consumer which will be used to write the array to.</param>
         public override void Write(object value, IJsonConsumer writer)
         {
             if (value == null)

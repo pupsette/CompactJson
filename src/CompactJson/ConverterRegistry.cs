@@ -4,8 +4,17 @@ using System.Reflection;
 
 namespace CompactJson
 {
+    /// <summary>
+    /// The static converter registry. It is used to register
+    /// type-specific converters or converter factories at the global scope.
+    /// 
+    /// A lot of type-specific converters and factories are registered
+    /// implicitly.
+    /// </summary>
 #if COMPACTJSON_PUBLIC
     public
+#else
+    internal
 #endif
     static class ConverterRegistry
     {
@@ -69,19 +78,26 @@ namespace CompactJson
         private static readonly List<IConverterFactory> FACTORIES = new List<IConverterFactory>();
         private static readonly IConverterFactory OBJECT_CONVERTER_FACTORY;
 
+        /// <summary>
+        /// Returns the type-specific converter for the given type.
+        /// An exception is thrown if there is no suitable converter for
+        /// the given type.
+        /// </summary>
+        /// <param name="type">The type for which to get the converter.</param>
+        /// <returns>The converter for the given type.</returns>
         public static IConverter Get(Type type)
         {
             return Get(type, null);
         }
 
-        private static string GetMemberNameString(MemberInfo memberInfo)
-        {
-            if (memberInfo == null)
-                return "";
-
-            return " of member '" + memberInfo.Name + "' of class " + memberInfo.DeclaringType.Name;
-        }
-
+        /// <summary>
+        /// Returns the type-specific converter for the given type.
+        /// An exception is thrown if there is no suitable converter for
+        /// the given type.
+        /// </summary>
+        /// <param name="type">The type for which to get the converter.</param>
+        /// <param name="converterParameters">An optional set of converter parameters.</param>
+        /// <returns>The converter for the given type.</returns>
         public static IConverter Get(Type type, ConverterParameters converterParameters)
         {
             lock (CONVERTERS)

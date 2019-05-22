@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace CompactJson
 {
-#if COMPACTJSON_PUBLIC
-    public
-#else
-    internal
-#endif
-    class ListConverter<T> : CollectionConverterBase
+    internal sealed class ListConverter<T> : CollectionConverterBase
     {
         public ListConverter(IConverter elementConverter) : base(typeof(List<T>), elementConverter)
         {
@@ -31,7 +25,6 @@ namespace CompactJson
         internal class Consumer : IJsonArrayConsumer
         {
             private readonly IConverter mElementConverter;
-            private readonly bool mOutputArray;
             private readonly List<T> mList;
             private readonly Action<List<T>> mWhenDone;
 

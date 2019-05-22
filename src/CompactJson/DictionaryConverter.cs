@@ -3,12 +3,7 @@ using System.Collections.Generic;
 
 namespace CompactJson
 {
-#if COMPACTJSON_PUBLIC
-    public
-#else
-    internal
-#endif
-    class DictionaryConverter<T> : CollectionConverterBase
+    internal sealed class DictionaryConverter<T> : CollectionConverterBase
     {
         public DictionaryConverter(IConverter elementConverter)
             : base(typeof(Dictionary<string, T>), elementConverter)

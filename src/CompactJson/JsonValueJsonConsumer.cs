@@ -5,7 +5,7 @@
     /// JSON data from any producer and creates a JSON object model,
     /// <see cref="JsonValue"/> and derived classes.
     /// </summary>
-    internal class JsonValueJsonConsumer : IJsonConsumer
+    internal sealed class JsonValueJsonConsumer : IJsonConsumer
     {
         public JsonValue Result;
 

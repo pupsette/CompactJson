@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace CompactJson
 {
-    internal class ListConverterFactory : IConverterFactory
+    internal sealed class ListConverterFactory : IConverterFactory
     {
         public bool CanConvert(Type type)
         {

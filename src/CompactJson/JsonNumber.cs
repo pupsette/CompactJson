@@ -2,6 +2,8 @@
 {
 #if COMPACTJSON_PUBLIC
     public
+#else
+    internal
 #endif
     abstract class JsonNumber : JsonValue
     {

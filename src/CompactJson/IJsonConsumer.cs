@@ -9,6 +9,8 @@
     /// </summary>
 #if COMPACTJSON_PUBLIC
     public
+#else
+    internal
 #endif
     interface IJsonConsumer
     {

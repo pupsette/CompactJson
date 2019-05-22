@@ -2,12 +2,7 @@
 
 namespace CompactJson
 {
-#if COMPACTJSON_PUBLIC
-    public
-#else
-    internal
-#endif
-    class ArrayConverter<T> : CollectionConverterBase
+    internal sealed class ArrayConverter<T> : CollectionConverterBase
     {
         public ArrayConverter(IConverter elementConverter) : base(typeof(T[]), elementConverter)
         {

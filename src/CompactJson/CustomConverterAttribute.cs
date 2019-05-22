@@ -3,6 +3,13 @@ using System.Reflection;
 
 namespace CompactJson
 {
+    /// <summary>
+    /// An attribute for specifying the converter for a type or member
+    /// explcitly.
+    /// 
+    /// This attribute may either reference an implementation of <see cref="IConverter"/>
+    /// or an implementation of <see cref="IConverterFactory"/>.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property | AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = false)]
 #if COMPACTJSON_PUBLIC
     public
@@ -11,11 +18,19 @@ namespace CompactJson
 #endif
     class CustomConverterAttribute : Attribute
     {
+        /// <summary>
+        /// Instantiates a <see cref="CustomConverterAttribute"/>.
+        /// </summary>
+        /// <param name="converterType">The type which implements either 
+        /// <see cref="IConverter"/> or <see cref="IConverterFactory"/>.</param>
         public CustomConverterAttribute(Type converterType)
         {
             ConverterType = converterType;
         }
 
+        /// <summary>
+        /// The type which implements either <see cref="IConverter"/> or <see cref="IConverterFactory"/>.
+        /// </summary>
         public Type ConverterType { get; }
 
         internal static Type GetConverterType(Type type)

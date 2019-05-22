@@ -33,11 +33,13 @@ namespace CompactJson
     /// input string.
     /// 
     /// </summary>
-#if COMPACTJSON_PUBLIC
-    public
-#endif
-    class DateTimeConverter : NullableConverterBase<DateTime>
+    internal sealed class DateTimeConverter : NullableConverterBase<DateTime>
     {
+        /// <summary>
+        /// Instantiates a <see cref="DateTimeConverter"/>.
+        /// </summary>
+        /// <param name="nullable">A flag indicating, whether this converter
+        /// handles a nullable <see cref="DateTime"/> or not.</param>
         public DateTimeConverter(bool nullable) : base(nullable)
         {
         }

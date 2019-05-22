@@ -4,7 +4,7 @@ using System.Text;
 
 namespace CompactJson
 {
-    internal class TextWriterJsonConsumer : IJsonConsumer
+    internal sealed class TextWriterJsonConsumer : IJsonConsumer
     {
         private readonly TextWriter mWriter;
         private readonly bool mIndentation;

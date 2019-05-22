@@ -3,10 +3,7 @@ using System.Collections.Generic;
 
 namespace CompactJson
 {
-#if COMPACTJSON_PUBLIC
-    public
-#endif
-    class EnumConverter : ConverterBase
+    internal sealed class EnumConverter : ConverterBase
     {
         private readonly Dictionary<string, object> mStringToEnumValue = new Dictionary<string, object>();
         private readonly Dictionary<object, string> mEnumValueToString = new Dictionary<object, string>();

@@ -3,7 +3,7 @@
     /// <summary>
     /// A converter for strings.
     /// </summary>
-    internal class StringConverter : ConverterBase
+    internal sealed class StringConverter : ConverterBase
     {
         /// <summary>
         /// Default constructor.

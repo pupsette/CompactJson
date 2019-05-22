@@ -1,9 +1,6 @@
 ﻿namespace CompactJson
 {
-#if COMPACTJSON_PUBLIC
-    public
-#endif
-    class Int64Converter : NullableConverterBase<long>
+    internal sealed class Int64Converter : NullableConverterBase<long>
     {
         public Int64Converter(bool nullable)
             : base(nullable)

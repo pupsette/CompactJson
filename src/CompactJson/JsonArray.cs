@@ -6,6 +6,8 @@ namespace CompactJson
 {
 #if COMPACTJSON_PUBLIC
     public
+#else
+    internal
 #endif
     class JsonArray : JsonValue, IReadOnlyList<JsonValue>, IJsonArrayConsumer
     {

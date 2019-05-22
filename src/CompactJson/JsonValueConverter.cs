@@ -2,10 +2,7 @@
 
 namespace CompactJson
 {
-#if COMPACTJSON_PUBLIC
-    public
-#endif
-    class JsonValueConverter : ConverterBase
+    internal class JsonValueConverter : ConverterBase
     {
         private readonly bool mAllowJsonNull;
         private readonly bool mAllowJsonArray;

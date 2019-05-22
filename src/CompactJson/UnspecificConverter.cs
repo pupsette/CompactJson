@@ -2,10 +2,7 @@
 
 namespace CompactJson
 {
-#if COMPACTJSON_PUBLIC
-    public
-#endif
-    class UnspecificConverter : JsonValueConverter
+    internal sealed class UnspecificConverter : JsonValueConverter
     {
         public UnspecificConverter()
             : base(typeof(object), allowJsonArray: true, allowJsonObject: true)

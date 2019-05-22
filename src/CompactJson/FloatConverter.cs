@@ -1,9 +1,6 @@
 ﻿namespace CompactJson
 {
-#if COMPACTJSON_PUBLIC
-    public
-#endif
-    class FloatConverter : NullableConverterBase<float>
+    internal sealed class FloatConverter : NullableConverterBase<float>
     {
         public FloatConverter(bool nullable)
             : base(nullable)

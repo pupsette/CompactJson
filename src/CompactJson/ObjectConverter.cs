@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace CompactJson
 {
-    internal class ObjectConverter : ConverterBase
+    internal sealed class ObjectConverter : ConverterBase
     {
         internal struct PropInfo
         {

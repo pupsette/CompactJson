@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace CompactJson
 {
-    class ObjectConverterFactory : IConverterFactory
+    internal sealed class ObjectConverterFactory : IConverterFactory
     {
         // this dictionary prevents infinite recursion if properties have the same type as one
         //  of the declaring types in the object hierarchy.
