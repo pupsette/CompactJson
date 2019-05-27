@@ -22,6 +22,11 @@ namespace CompactJson
             if (customConverterType != null)
                 return ConverterFactoryHelper.CreateConverter(ConverterFactoryHelper.FromType(customConverterType), type, null);
 
+            return Create(type);
+        }
+
+        internal static IConverter Create(Type type)
+        {
             ObjectConverter converter;
             lock (CURRENTLY_REFLECTED_TYPES)
             {
