@@ -4,6 +4,9 @@ using System.Collections.Generic;
 
 namespace CompactJson
 {
+    /// <summary>
+    /// The class represents a generic JSON array.
+    /// </summary>
 #if COMPACTJSON_PUBLIC
     public
 #else
@@ -11,35 +14,53 @@ namespace CompactJson
 #endif
     class JsonArray : JsonValue, IReadOnlyList<JsonValue>, IJsonArrayConsumer
     {
+        /// <summary>
+        /// Internal constructor for usage in a JSON consumer.
+        /// </summary>
+        /// <param name="whenDone">The callback to invoke when the
+        /// array is done.</param>
         internal JsonArray(Action<object> whenDone)
             : this()
         {
             this.mWhenDone = whenDone;
         }
 
+        /// <summary>
+        /// Initializes an empty array.
+        /// </summary>
         public JsonArray()
         {
             mList = new List<JsonValue>();
         }
 
+        /// <summary>
+        /// Initializes the JSON array with the given list.
+        /// The list is not copied, but a reference to it is held.
+        /// Hence, adding/removing items from the JSON array will modify
+        /// the originally passed list.
+        /// </summary>
         public JsonArray(IList<JsonValue> data)
         {
             mList = data;
         }
 
-        private readonly IList<JsonValue> mList;
-        private readonly Action<object> mWhenDone;
-
+        /// <summary>
+        /// Gets or sets the element at the specified index.
+        /// </summary>
         public JsonValue this[int index]
         {
             get { return mList[index]; }
+            set { mList[index] = value; }
         }
 
+        /// <summary>
+        /// Gets the number of elements contained in this JSON array.
+        /// </summary>
         public int Count { get { return mList.Count; } }
 
         IEnumerator<JsonValue> IEnumerable<JsonValue>.GetEnumerator()
         {
-            return ((IEnumerable<JsonValue>)mList).GetEnumerator();
+            return mList.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -91,6 +112,13 @@ namespace CompactJson
             mWhenDone?.Invoke(this);
         }
 
+        /// <summary>
+        /// Writes this <see cref="JsonArray"/> to a <see cref="IJsonConsumer"/>.
+        /// This is also used internally by <see cref="JsonValue.ToModel(System.Type)"/> and 
+        /// <see cref="JsonValue.ToModel{T}"/> in order to convert this generic object 
+        /// model to a JSON string or another .NET object.
+        /// </summary>
+        /// <param name="consumer">The consumer.</param>
         public override void Write(IJsonConsumer consumer)
         {
             IJsonArrayConsumer arrayConsumer = consumer.Array();
@@ -98,5 +126,8 @@ namespace CompactJson
                 mList[i].Write(arrayConsumer);
             arrayConsumer.Done();
         }
+
+        private readonly IList<JsonValue> mList;
+        private readonly Action<object> mWhenDone;
     }
 }

@@ -91,6 +91,35 @@ namespace CompactJson
         }
 
         /// <summary>
+        /// Compares this JSON value to the given object for equality.
+        /// </summary>
+        /// <param name="obj">The other JSON value. If this is null or does not
+        /// inherit <see cref="JsonValue"/> false is returned.</param>
+        /// <returns>true, if the objects are equal; false, otherwise.</returns>
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(this, obj))
+                return true;
+
+            if (!(obj is JsonValue jsonValue))
+                return false;
+
+            // we use the string represenation for equality comparison
+            return jsonValue.ToString(false).Equals(this.ToString(false), StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Computes a hash code for this JSON value.
+        /// </summary>
+        /// <returns>The hash code for this JSON value.</returns>
+        public override int GetHashCode()
+        {
+            JsonHashCodeBuilder hashCodeBuilder = new JsonHashCodeBuilder();
+            Write(hashCodeBuilder);
+            return hashCodeBuilder.HashCode;
+        }
+
+        /// <summary>
         /// Converts this generic object model to a JSON string with indentation.
         /// </summary>
         /// <returns>The JSON string.</returns>

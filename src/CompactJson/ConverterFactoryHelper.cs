@@ -22,6 +22,15 @@ namespace CompactJson
             return ConverterRegistry.Get(type, converterParameters);
         }
 
+        /// <summary>
+        /// Creates a converter factory from the given type. The given type may either
+        /// implement <see cref="IConverter"/> or <see cref="IConverterFactory"/> or just 
+        /// be null. In case type is null, the returned converter factory is also null.
+        /// </summary>
+        /// <param name="converterOrFactoryType">The type implementing either
+        /// <see cref="IConverter"/> or <see cref="IConverterFactory"/>.</param>
+        /// <returns>The converter factory or null, if <paramref name="converterOrFactoryType"/>
+        /// is null.</returns>
         public static IConverterFactory FromType(Type converterOrFactoryType)
         {
             if (converterOrFactoryType == null)

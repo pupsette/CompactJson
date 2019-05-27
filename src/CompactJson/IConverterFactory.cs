@@ -23,6 +23,13 @@ namespace CompactJson
         /// of converting objects of the given type.</returns>
         IConverter Create(Type type, ConverterParameters parameters);
 
+        /// <summary>
+        /// Checks, whether this converter factory is capable of converting the
+        /// given type.
+        /// </summary>
+        /// <param name="type">The type to check.</param>
+        /// <returns>true, if this converter factory can create a converter for
+        /// the given type; false, otherwise.</returns>
         bool CanConvert(Type type);
     }
 }
