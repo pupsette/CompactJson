@@ -17,11 +17,11 @@ namespace CompactJson
         /// Creates a converter for the given type.
         /// </summary>
         /// <param name="type">The type for which to create the converter.</param>
-        /// <param name="parameters">The <see cref="ConverterParameters"/> This is 
-        /// determined by the attributes of the reflected property or field.</param>
+        /// <param name="parameters">An optional set of converter-specific parameters 
+        /// for the new converter.</param>
         /// <returns>An instance of <see cref="IConverter"/> which is capable
         /// of converting objects of the given type.</returns>
-        IConverter Create(Type type, ConverterParameters parameters);
+        IConverter Create(Type type, object[] parameters);
 
         /// <summary>
         /// Checks, whether this converter factory is capable of converting the

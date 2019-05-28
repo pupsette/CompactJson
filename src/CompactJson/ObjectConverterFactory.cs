@@ -14,18 +14,7 @@ namespace CompactJson
             return type.IsClass || (type.IsValueType && !type.IsPrimitive);
         }
 
-        public IConverter Create(Type type, ConverterParameters converterParameters)
-        {
-            // if a custom converter has been specified using the CustomConverterAttribute,
-            //  we use this converter instead.
-            Type customConverterType = CustomConverterAttribute.GetConverterType(type);
-            if (customConverterType != null)
-                return ConverterFactoryHelper.CreateConverter(ConverterFactoryHelper.FromType(customConverterType), type, null);
-
-            return Create(type);
-        }
-
-        internal static IConverter Create(Type type)
+        public IConverter Create(Type type, object[] parameters)
         {
             ObjectConverter converter;
             lock (CURRENTLY_REFLECTED_TYPES)

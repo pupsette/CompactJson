@@ -9,7 +9,7 @@ namespace CompactJson
             return type.IsEnum;
         }
 
-        public IConverter Create(Type type, ConverterParameters converterParameters)
+        public IConverter Create(Type type, object[] converterParameters)
         {
             if (!type.IsEnum)
                 throw new ArgumentException($"Type '{type}' was expected to be an enum.");

@@ -123,8 +123,8 @@ namespace CompactJson
         /// <param name="whenDone">A callback which must be used to pass
         /// the resulting .NET object, when Done() of the object consumer
         /// gets called.</param>
-        /// <returns>An <see cref="IJsonObjectConsumer"/> implementation which
-        /// is used to pass the elements of the array.</returns>
+        /// <returns>An implementation of <see cref="IJsonObjectConsumer"/> which
+        /// is used to consume the properties of the JSON object.</returns>
         public virtual IJsonObjectConsumer FromObject(Action<object> whenDone)
         {
             throw new Exception($"Cannot convert JSON object to type '{Type}'.");

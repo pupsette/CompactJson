@@ -5,22 +5,26 @@ VisualStudioVersion = 15.0.27703.2035
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CompactJson", "CompactJson\CompactJson.csproj", "{62FE2F9F-8859-4096-B375-C3A8F14C61CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CompactJson.Tests", "CompactJson.Tests\CompactJson.Tests.csproj", "{176309D7-081B-4CAE-B48C-4A9E3F6FD565}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CompactJson.Tests", "CompactJson.Tests\CompactJson.Tests.csproj", "{176309D7-081B-4CAE-B48C-4A9E3F6FD565}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
+		Sources|Any CPU = Sources|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{62FE2F9F-8859-4096-B375-C3A8F14C61CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{62FE2F9F-8859-4096-B375-C3A8F14C61CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{62FE2F9F-8859-4096-B375-C3A8F14C61CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{62FE2F9F-8859-4096-B375-C3A8F14C61CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{62FE2F9F-8859-4096-B375-C3A8F14C61CA}.Sources|Any CPU.ActiveCfg = Sources|Any CPU
+		{62FE2F9F-8859-4096-B375-C3A8F14C61CA}.Sources|Any CPU.Build.0 = Sources|Any CPU
 		{176309D7-081B-4CAE-B48C-4A9E3F6FD565}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{176309D7-081B-4CAE-B48C-4A9E3F6FD565}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{176309D7-081B-4CAE-B48C-4A9E3F6FD565}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{176309D7-081B-4CAE-B48C-4A9E3F6FD565}.Release|Any CPU.Build.0 = Release|Any CPU
+		{176309D7-081B-4CAE-B48C-4A9E3F6FD565}.Sources|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

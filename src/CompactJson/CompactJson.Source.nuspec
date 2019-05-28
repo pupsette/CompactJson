@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
-    <metadata>
-        <id>CompactJson.Sources</id>
-        <version>$version$</version>
-        <title>Compact JSON serializer as C# source code</title>
-        <description>C# source code package for embedding a very compact JSON serializer in .NET applications and libraries</description>
-        <licenseUrl>https://mit-license.org/</licenseUrl>
-        <authors>Matthias Hess</authors>
-        <contentFiles>
-            <files include="cs/any/**/*.cs" buildAction="Compile" />
-        </contentFiles>
-    </metadata>
-    <files>
-        <file src="*.cs" target="contentFiles/cs/any/CompactJson" />
-    </files>
+  <metadata>
+    <id>CompactJson.Sources</id>
+    <version>$version$</version>
+    <title>Fast and lightweight JSON serializer source code for embedding in C# projects</title>
+    <description>C# source code package for embedding a very compact JSON serializer in C# applications and libraries.</description>
+    <licenseUrl>https://mit-license.org/</licenseUrl>
+    <projectUrl>https://github.com/pupsette/CompactJson</projectUrl>
+    <owners>Matthias Hess</owners>
+    <authors>Matthias Hess</authors>
+    <contentFiles>
+      <files include="cs/any/**/*.cs" buildAction="Compile" />
+    </contentFiles>
+  </metadata>
+  <files>
+    <file src="*.cs" target="contentFiles/cs/any/CompactJson" />
+  </files>
 </package>

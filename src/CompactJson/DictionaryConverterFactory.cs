@@ -13,7 +13,7 @@ namespace CompactJson
             return genericTypeDef == typeof(Dictionary<,>) && genericTypeDef.GetGenericArguments()[0] == typeof(string);
         }
 
-        public IConverter Create(Type type, ConverterParameters converterParameters)
+        public IConverter Create(Type type, object[] parameters)
         {
             Type genericTypeDef = type.GetGenericTypeDefinition();
             if (genericTypeDef != typeof(Dictionary<,>))
@@ -24,8 +24,12 @@ namespace CompactJson
                 throw new ArgumentException($"Type '{type}' was expected to have string keys.");
 
             Type elementType = genericArguments[1];
+
+            Type elementConverterType = ConverterFactoryHelper.GetConverterParameter<Type>(typeof(DictionaryConverterFactory), parameters, 0, 0, 1);
+            IConverter elementConverter = ConverterFactoryHelper.CreateConverter(elementConverterType, elementType, null);
+
             Type dictConverterType = typeof(DictionaryConverter<>).MakeGenericType(elementType);
-            return (IConverter)Activator.CreateInstance(dictConverterType, ConverterRegistry.Get(elementType, null));
+            return (IConverter)Activator.CreateInstance(dictConverterType, elementConverter);
         }
     }
 }

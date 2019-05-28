@@ -10,7 +10,7 @@ namespace CompactJson.Tests
         [TypeName(typeof(BaseClass), "BASE")]
         [TypeName(typeof(DerivedA), "A")]
         [TypeName(typeof(DerivedB), "B")]
-        [CustomConverter(typeof(TypedConverterFactory))]
+        [CustomConverter(typeof(TypedConverterFactory), "_typilo_")]
         public class BaseClass
         {
             public string TheBase;

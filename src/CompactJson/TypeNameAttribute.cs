@@ -5,6 +5,14 @@ using System.Reflection;
 
 namespace CompactJson
 {
+    /// <summary>
+    /// An attribute which is used to assign type names
+    /// to .NET classes in case type information has to be encoded
+    /// in JSON data by using the <see cref="TypedConverter"/>.
+    /// 
+    /// The <see cref="TypeNameAttribute"/> has to be added multiple
+    /// times to the base class. Once for each sub class, it should support.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 #if COMPACTJSON_PUBLIC
     public
@@ -18,10 +26,8 @@ namespace CompactJson
         /// </summary>
         /// <param name="type">The known type for which to assign a type name.</param>
         /// <param name="typeName">The type name to assign.</param>
-        /// <param name="customConverterType">An optional custom converter for the known type.</param>
-        public TypeNameAttribute(Type type, string typeName, Type customConverterType = null)
+        public TypeNameAttribute(Type type, string typeName)
         {
-            CustomConverterType = customConverterType;
             Type = type;
             TypeName = typeName;
         }
@@ -35,12 +41,6 @@ namespace CompactJson
         /// The type.
         /// </summary>
         public Type Type { get; }
-
-        /// <summary>
-        /// An optional custom converter for the known type which implements either 
-        /// <see cref="IConverter"/> or <see cref="IConverterFactory"/>.
-        /// </summary>
-        public Type CustomConverterType { get; }
 
         internal static TypeNameAttribute[] GetKnownTypes(Type type)
         {

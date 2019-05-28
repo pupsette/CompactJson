@@ -5,7 +5,13 @@ namespace CompactJson
 {
     internal static class ConverterFactoryHelper
     {
-        public static IConverter CreateConverter(IConverterFactory factory, Type type, ConverterParameters converterParameters)
+        public static IConverter CreateConverter(Type converterType, Type type, object[] converterParameters)
+        {
+            IConverterFactory factory = FromType(converterType);
+            return CreateConverter(factory, type, converterParameters);
+        }
+
+        private static IConverter CreateConverter(IConverterFactory factory, Type type, object[] converterParameters)
         {
             if (factory != null)
             {
@@ -31,7 +37,7 @@ namespace CompactJson
         /// <see cref="IConverter"/> or <see cref="IConverterFactory"/>.</param>
         /// <returns>The converter factory or null, if <paramref name="converterOrFactoryType"/>
         /// is null.</returns>
-        public static IConverterFactory FromType(Type converterOrFactoryType)
+        private static IConverterFactory FromType(Type converterOrFactoryType)
         {
             if (converterOrFactoryType == null)
                 return null;
@@ -43,6 +49,27 @@ namespace CompactJson
                 return (IConverterFactory)Instantiate(converterOrFactoryType);
 
             throw new Exception($"{converterOrFactoryType} must implement either {nameof(IConverter)} or {nameof(IConverterFactory)}.");
+        }
+
+        public static T GetConverterParameter<T>(Type converterFactory, object[] parameters, int index, int minParameters, int maxParameters)
+        {
+            if (parameters == null)
+            {
+                if (minParameters > 0)
+                    throw new Exception($"{converterFactory} expects at least {minParameters} converter parameters.");
+
+                return default(T);
+            }
+            if (parameters.Length < minParameters)
+                throw new Exception($"{converterFactory} expects at least {minParameters} converter parameters, but only {parameters.Length} were given.");
+
+            if (parameters.Length > maxParameters)
+                throw new Exception($"{converterFactory} cannot take more than {maxParameters} converter parameters, but {parameters.Length} were given.");
+
+            if (index < parameters.Length && parameters[index] != null)
+                return (T)parameters[index];
+
+            return default(T);
         }
 
         private class FixedConverterFactory : IConverterFactory
@@ -59,8 +86,11 @@ namespace CompactJson
                 return converter.Type == null || converter.Type == type;
             }
 
-            public IConverter Create(Type type, ConverterParameters parameters)
+            public IConverter Create(Type type, object[] parameters)
             {
+                if (parameters != null && parameters.Length > 0)
+                    throw new Exception($"{type} does not take additional converter parameters.");
+
                 return converter;
             }
         }

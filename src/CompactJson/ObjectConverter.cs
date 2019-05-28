@@ -26,11 +26,8 @@ namespace CompactJson
 
         private void AddProperty(MemberInfo memberInfo, Func<object, object> getter, Action<object, object> setter, Type propertyType)
         {
-            Type converterType = CustomConverterAttribute.GetConverterType(memberInfo);
-            IConverterFactory factory = ConverterFactoryHelper.FromType(converterType);
-
-            ConverterParameters parameters = ConverterParameters.Reflect(memberInfo);
-            IConverter converter = ConverterFactoryHelper.CreateConverter(factory, propertyType, parameters);
+            Type converterType = CustomConverterAttribute.GetConverterType(memberInfo, out object[] converterParameters);
+            IConverter converter = ConverterFactoryHelper.CreateConverter(converterType, propertyType, converterParameters);
 
             mProps.Add(memberInfo.Name, new PropInfo
             {

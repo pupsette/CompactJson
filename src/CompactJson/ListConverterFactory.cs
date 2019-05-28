@@ -10,15 +10,17 @@ namespace CompactJson
             return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(List<>);
         }
 
-        public IConverter Create(Type type, ConverterParameters converterParameters)
+        public IConverter Create(Type type, object[] converterParameters)
         {
             Type genericTypeDef = type.GetGenericTypeDefinition();
             if (genericTypeDef != typeof(List<>))
                 throw new ArgumentException($"Type '{type}' was expected to be a generic List<>.");
 
             Type elementType = type.GetGenericArguments()[0];
+            Type elementConverterType = ConverterFactoryHelper.GetConverterParameter<Type>(typeof(ListConverterFactory), converterParameters, 0, 0, 1);
+            IConverter elementConverter = ConverterFactoryHelper.CreateConverter(elementConverterType, elementType, null);
+
             Type listConverterType = typeof(ListConverter<>).MakeGenericType(elementType);
-            IConverter elementConverter = ConverterFactoryHelper.CreateConverter(converterParameters?.ElementConverterFactory, elementType, null);
             return (IConverter)Activator.CreateInstance(listConverterType, new object[] { elementConverter });
         }
     }

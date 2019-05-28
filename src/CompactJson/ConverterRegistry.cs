@@ -41,13 +41,12 @@ namespace CompactJson
             AddConverter(new JsonValueConverter(typeof(JsonBoolean), allowJsonBoolean: true));
             AddConverter(new JsonValueConverter(typeof(JsonString), allowJsonString: true, acceptNull: true));
 
+            AddConverterFactory(new ObjectConverterFactory());
             AddConverterFactory(new ListConverterFactory());
             AddConverterFactory(new ArrayConverterFactory());
             AddConverterFactory(new DictionaryConverterFactory());
             AddConverterFactory(new EnumConverterFactory());
-
-            // fallback converter factory
-            OBJECT_CONVERTER_FACTORY = new ObjectConverterFactory();
+            AddConverterFactory(new CustomConverterFactory());
         }
 
         /// <summary>
@@ -65,7 +64,7 @@ namespace CompactJson
         /// which are new to the <see cref="ConverterRegistry"/>.
         /// 
         /// If a type can be handled by multiple converter factories, the factory which
-        /// has been added first, will be used to create a converter for the type.
+        /// has been added last, will be used to create a converter for the type.
         /// </summary>
         /// <param name="converterFactory">The converter factory to add.</param>
         public static void AddConverterFactory(IConverterFactory converterFactory)
@@ -76,7 +75,7 @@ namespace CompactJson
 
         private static readonly Dictionary<Type, IConverter> CONVERTERS = new Dictionary<Type, IConverter>();
         private static readonly List<IConverterFactory> FACTORIES = new List<IConverterFactory>();
-        private static readonly IConverterFactory OBJECT_CONVERTER_FACTORY;
+        private static readonly Dictionary<Type, int> CURRENTLY_CREATING_CONVERTERS = new Dictionary<Type, int>();
 
         /// <summary>
         /// Returns the type-specific converter for the given type.
@@ -98,7 +97,7 @@ namespace CompactJson
         /// <param name="type">The type for which to get the converter.</param>
         /// <param name="converterParameters">An optional set of converter parameters.</param>
         /// <returns>The converter for the given type.</returns>
-        public static IConverter Get(Type type, ConverterParameters converterParameters)
+        public static IConverter Get(Type type, object[] converterParameters)
         {
             lock (CONVERTERS)
             {
@@ -107,22 +106,39 @@ namespace CompactJson
                     return converter;
 
                 converter = CreateConverter(type, converterParameters);
-                if (converterParameters == null)
+                if (converterParameters == null || converterParameters.Length == 0)
                     CONVERTERS[type] = converter;
                 return converter;
             }
         }
 
-        private static IConverter CreateConverter(Type type, ConverterParameters converterParameters)
+        private static IConverter CreateConverter(Type type, object[] converterParameters)
         {
-            for (int i = 0; i < FACTORIES.Count; i++)
+            int factoryStartIndex;
+            // recursive calls will by default skip the previously used converter factory.
+            bool isRecursion = CURRENTLY_CREATING_CONVERTERS.TryGetValue(type, out factoryStartIndex);
+            if (!isRecursion)
+                factoryStartIndex = FACTORIES.Count - 1;
+
+            // walk the factories from last to first
+            for (int i = factoryStartIndex; i >= 0; i--)
             {
                 if (FACTORIES[i].CanConvert(type))
-                    return FACTORIES[i].Create(type, converterParameters);
+                {
+                    CURRENTLY_CREATING_CONVERTERS[type] = i - 1;
+                    try
+                    {
+                        return FACTORIES[i].Create(type, converterParameters);
+                    }
+                    finally
+                    {
+                        if (isRecursion)
+                            CURRENTLY_CREATING_CONVERTERS[type] = factoryStartIndex; // reset to the previous index
+                        else
+                            CURRENTLY_CREATING_CONVERTERS.Remove(type); // clear any start index
+                    }
+                }
             }
-
-            if (OBJECT_CONVERTER_FACTORY.CanConvert(type))
-                return OBJECT_CONVERTER_FACTORY.Create(type, converterParameters);
 
             throw new Exception($"Unsupported model type '{type}'.");
         }

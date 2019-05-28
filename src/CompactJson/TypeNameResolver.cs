@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace CompactJson
 {
+    /// <summary>
+    /// Implementation of <see cref="ITypeNameResolver"/>.
+    /// </summary>
 #if COMPACTJSON_PUBLIC
     public
 #else
@@ -10,58 +13,76 @@ namespace CompactJson
 #endif
     class TypeNameResolver : ITypeNameResolver
     {
+        /// <summary>
+        /// Initializes a new <see cref="TypeNameResolver"/>.
+        /// </summary>
+        /// <param name="caseSensitive">Whether the type names are case-sensitive or not.</param>
         public TypeNameResolver(bool caseSensitive = false)
         {
             mNameToType = new Dictionary<string, Entry>(caseSensitive ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase);
             mTypeToName = new Dictionary<Type, Entry>();
         }
 
-        public void AddType(string typeName, Type type, IConverter customConverter = null)
+        /// <summary>
+        /// Assign the specified type name to the given type. Each type and each
+        /// type name must only occur once!
+        /// </summary>
+        /// <param name="typeName">The type name.</param>
+        /// <param name="type">The type.</param>
+        public void AddType(string typeName, Type type)
         {
             Entry entry;
             entry.TypeName = typeName;
-            entry.Converter = customConverter ?? ConverterRegistry.Get(type);
             entry.Type = type;
 
             mNameToType.Add(typeName, entry);
             mTypeToName.Add(type, entry);
         }
 
-        public bool TryGetTypeName(Type type, out string typeName, out IConverter converter)
+        /// <summary>
+        /// Tries to find the type name for the given type. If the type
+        /// is unknown, false is returned.
+        /// </summary>
+        /// <param name="type">The type for which to find the type name.</param>
+        /// <param name="typeName">The resulting type name, or null.</param>
+        /// <returns>true, if a type name was assigned to the given type; false, otherwise.</returns>
+        public bool TryGetTypeName(Type type, out string typeName)
         {
             if (mTypeToName.TryGetValue(type, out Entry entry))
             {
                 typeName = entry.TypeName;
-                converter = entry.Converter;
                 return true;
             }
             else
             {
                 typeName = null;
-                converter = null;
                 return false;
             }
         }
 
-        public bool TryGetConverterFromTypeName(string typeName, out Type type, out IConverter converter)
+        /// <summary>
+        /// Tries to find the type for the given type name. If the type name
+        /// is unknown, false is returned.
+        /// </summary>
+        /// <param name="typeName">The type name for which to find the type.</param>
+        /// <param name="type">The resulting type, or null.</param>
+        /// <returns>true, if the type name is known; false, otherwise.</returns>
+        public bool TryGetType(string typeName, out Type type)
         {
             if (mNameToType.TryGetValue(typeName, out Entry entry))
             {
                 type = entry.Type;
-                converter = entry.Converter;
                 return true;
             }
             else
             {
                 type = null;
-                converter = null;
                 return false;
             }
         }
 
         private struct Entry
         {
-            public IConverter Converter;
             public Type Type;
             public string TypeName;
         }
