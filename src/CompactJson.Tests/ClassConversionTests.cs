@@ -30,18 +30,31 @@ namespace CompactJson.Tests
             public TestClass Nested { get; set; }
         }
 
-        //private class TestClassMulti : TestClass
-        //{
-        //    [MultiTypeProperty("Int", typeof(int))]
-        //    [MultiTypeProperty("String", typeof(string))]
-        //    [MultiTypeProperty("Float", typeof(double))]
-        //    [MultiTypeProperty("IntArray", typeof(int[]))]
-        //    public object Multi { get; set; }
+        private class TestClassPrivateMembers
+        {
+            public TestClassPrivateMembers()
+            {
+            }
 
-        //    [MultiTypeProperty("A", typeof(TestClassDerivedA))]
-        //    [MultiTypeProperty("B", typeof(TestClassDerivedB))]
-        //    public TestBaseClass MultiDerived { get; set; }
-        //}
+            public TestClassPrivateMembers(string privateSetterPropertyValue, string privatePropertyValue, string privateFieldValue, string privateReadonlyFieldValue)
+            {
+                PrivateSetter = privateSetterPropertyValue;
+                PrivateProperty = privatePropertyValue;
+                PrivateField = privateFieldValue;
+                PrivateReadOnlyField = privateReadonlyFieldValue;
+            }
+
+            internal readonly string writeOk;
+            public string WriteOk { get { return writeOk; } }
+
+            public string PrivateSetter { get; private set; }
+
+            private string PrivateProperty { get; set; }
+
+            private string PrivateField;
+
+            private readonly string PrivateReadOnlyField;
+        }
 
         private class TestBaseClass
         {

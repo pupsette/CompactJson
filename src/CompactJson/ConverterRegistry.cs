@@ -33,6 +33,8 @@ namespace CompactJson
             AddConverter(new BooleanConverter(true));
             AddConverter(new DateTimeConverter(false));
             AddConverter(new DateTimeConverter(true));
+            AddConverter(new GuidConverter(false));
+            AddConverter(new GuidConverter(true));
             AddConverter(new UnspecificConverter());
             AddConverter(new JsonValueConverter(typeof(JsonValue), true, true, true, true, true, true, true, false));
             AddConverter(new JsonValueConverter(typeof(JsonObject), allowJsonObject: true, acceptNull: true));

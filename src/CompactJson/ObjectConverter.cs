@@ -60,16 +60,39 @@ namespace CompactJson
         {
             mProps.Clear();
 
-            foreach (PropertyInfo property in Type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty))
-                AddProperty(property, CreateGet(property), CreateSet(property), property.PropertyType);
+            foreach (PropertyInfo property in Type.GetProperties(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public))
+            {
+                if (PropertyQualifies(property))
+                    AddProperty(property, CreateGet(property), CreateSet(property), property.PropertyType);
+            }
 
-            foreach (FieldInfo field in Type.GetFields(BindingFlags.Instance | BindingFlags.Public))
-                AddProperty(field, CreateGet(field), CreateSet(field), field.FieldType);
+            foreach (FieldInfo field in Type.GetFields(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public))
+            {
+                if (FieldQualifies(field))
+                    AddProperty(field, CreateGet(field), CreateSet(field), field.FieldType);
+            }
 
             mPropList = mProps.Values.ToArray();
             Array.Sort(mPropList, (p1, p2) => p1.Name.CompareTo(p2.Name));
 
             mConstructor = GetConstructor(Type);
+        }
+
+        private static bool FieldQualifies(FieldInfo field)
+        {
+            if (field.IsPublic && !field.IsInitOnly)
+                return true;
+
+            return field.IsDefined(typeof(JsonPropertyAttribute), true);
+        }
+
+        private static bool PropertyQualifies(PropertyInfo property)
+        {
+            if ((property.GetSetMethod()?.IsPublic ?? false) &&
+                (property.GetGetMethod()?.IsPublic ?? false))
+                return true;
+
+            return property.IsDefined(typeof(JsonPropertyAttribute), true);
         }
 
         private static Func<object> GetConstructor(Type objtype)
@@ -131,10 +154,11 @@ namespace CompactJson
 
         private static Func<object, object> CreateGet(PropertyInfo propertyInfo)
         {
+            MethodInfo getMethod = propertyInfo.GetGetMethod(true);
+            if (getMethod == null)
+                return obj => throw new Exception($"Property '{propertyInfo.Name}' of type {propertyInfo.DeclaringType} has no getter, hence it cannot be converted to JSON.");
+
             ParameterExpression instanceParameter = Expression.Parameter(typeof(object), "instance");
-
-            MethodInfo getMethod = propertyInfo.GetGetMethod(false);
-
             Expression getExpression;
             if (getMethod.IsStatic)
             {
@@ -156,6 +180,10 @@ namespace CompactJson
 
         private static Action<object, object> CreateSet(PropertyInfo propertyInfo)
         {
+            MethodInfo setMethod = propertyInfo.GetSetMethod(true);
+            if (setMethod == null)
+                return (obj, val) => throw new Exception($"Property '{propertyInfo.Name}' of type {propertyInfo.DeclaringType} has no setter, hence it cannot be read from JSON.");
+
             // use reflection for structs
             // expression doesn't correctly set value
             if (propertyInfo.DeclaringType.IsValueType)
@@ -167,7 +195,6 @@ namespace CompactJson
             ParameterExpression valueParameter = Expression.Parameter(typeof(object), "value");
 
             Expression readValueParameter = EnsureCastExpression(valueParameter, propertyInfo.PropertyType);
-            MethodInfo setMethod = propertyInfo.GetSetMethod(false);
 
             Expression setExpression;
             if (setMethod.IsStatic)
@@ -187,9 +214,12 @@ namespace CompactJson
 
         private static Action<object, object> CreateSet(FieldInfo fieldInfo)
         {
+            if (fieldInfo.IsInitOnly)
+                return (obj, val) => throw new Exception($"Field '{fieldInfo.Name}' of type {fieldInfo.DeclaringType} is readonly, hence it cannot be read from JSON.");
+
             // use reflection for structs
             // expression doesn't correctly set value
-            if (fieldInfo.DeclaringType.IsValueType || fieldInfo.IsInitOnly)
+            if (fieldInfo.DeclaringType.IsValueType)
             {
                 return fieldInfo.SetValue;
             }
