@@ -21,6 +21,7 @@ namespace CompactJson
     {
         private readonly ITypeNameResolver mTypeNameResolver;
         private readonly string mTypeProperty;
+        private readonly ObjectConverter mBaseClassConverter;
 
         /// <summary>
         /// Initializes a new <see cref="TypedConverter"/> with the given type.
@@ -30,23 +31,8 @@ namespace CompactJson
         /// <param name="typeProperty">The name of the JSON property which should
         /// be used to encode the type information.</param>
         public TypedConverter(Type type, string typeProperty)
-            : base(type)
+            : this(type, CreateTypeNameResolverFromAttributes(type), typeProperty)
         {
-            TypeNameAttribute[] attributes = TypeNameAttribute.GetKnownTypes(type);
-            if (attributes == null)
-                throw new Exception($"Type {type} is not supported by {nameof(TypedConverter)} due to missing {nameof(TypeNameAttribute)}s.");
-
-            TypeNameResolver resolver = new TypeNameResolver();
-            foreach (var attribute in attributes)
-            {
-                if (!type.IsAssignableFrom(attribute.Type))
-                    throw new Exception($"Type '{attribute.Type}' cannot be assigned a name using the {nameof(TypeNameAttribute)} because it does not inherit from '{type}'.");
-
-                resolver.AddType(attribute.TypeName, attribute.Type);
-            }
-
-            mTypeNameResolver = resolver;
-            mTypeProperty = typeProperty ?? throw new ArgumentNullException(nameof(typeProperty));
         }
 
         /// <summary>
@@ -62,6 +48,8 @@ namespace CompactJson
         public TypedConverter(Type type, ITypeNameResolver typeNameResolver, string typeProperty)
             : base(type)
         {
+            mBaseClassConverter = new ObjectConverter(type);
+            mBaseClassConverter.Reflect();
             mTypeNameResolver = typeNameResolver ?? throw new ArgumentNullException(nameof(typeNameResolver));
             mTypeProperty = typeProperty ?? throw new ArgumentNullException(nameof(typeProperty));
         }
@@ -106,8 +94,33 @@ namespace CompactJson
             if (!mTypeNameResolver.TryGetTypeName(type, out string typeName))
                 throw new Exception($"Type '{type}' is unknown.");
 
-            IConverter converter = ConverterRegistry.Get(type);
+            IConverter converter = GetConverterForType(type);
             converter.Write(value, new WritingConsumer(typeName, mTypeProperty, type, writer));
+        }
+
+        private IConverter GetConverterForType(Type type)
+        {
+            if (type == this.Type)
+                return mBaseClassConverter;
+            else
+                return ConverterRegistry.Get(type);
+        }
+
+        private static ITypeNameResolver CreateTypeNameResolverFromAttributes(Type type)
+        {
+            TypeNameAttribute[] attributes = TypeNameAttribute.GetKnownTypes(type);
+            if (attributes == null)
+                throw new Exception($"Type {type} is not supported by {nameof(TypedConverter)} due to missing {nameof(TypeNameAttribute)}s.");
+
+            TypeNameResolver resolver = new TypeNameResolver();
+            foreach (var attribute in attributes)
+            {
+                if (!type.IsAssignableFrom(attribute.Type))
+                    throw new Exception($"Type '{attribute.Type}' cannot be assigned a name using the {nameof(TypeNameAttribute)} because it does not inherit from '{type}'.");
+
+                resolver.AddType(attribute.TypeName, attribute.Type);
+            }
+            return resolver;
         }
 
         private class ReadingConsumer : IJsonObjectConsumer
@@ -161,8 +174,7 @@ namespace CompactJson
                     if (!mParent.mTypeNameResolver.TryGetType(value, out Type type))
                         throw new Exception($"Type name '{value}' is unknown while deserializing type '{mBaseType}'.");
 
-                    IConverter converter = ConverterRegistry.Get(type);
-                    mWrappedConsumer = converter.FromObject(mWhenDone);
+                    mWrappedConsumer = mParent.GetConverterForType(type).FromObject(mWhenDone);
                 }
                 else
                     mWrappedConsumer.String(value);

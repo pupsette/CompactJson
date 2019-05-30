@@ -2,6 +2,10 @@
 
 namespace CompactJson
 {
+    /// <summary>
+    /// This converter factory checks for the <see cref="CustomConverterAttribute"/>.
+    /// If found a converter is instantiated according to the type specified.
+    /// </summary>
     internal sealed class CustomConverterFactory : IConverterFactory
     {
         public bool CanConvert(Type type)

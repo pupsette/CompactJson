@@ -19,11 +19,17 @@ namespace CompactJson.Tests
         public class DerivedA : BaseClass
         {
             public int A;
+
+            [JsonProperty("Red")]
+            public string AlwaysPresent = "HELLO";
         }
 
         public class DerivedB : BaseClass
         {
             public bool? B;
+
+            [JsonIgnoreMember]
+            public string AlwaysPresent = "HELLO";
         }
 
         public class Container

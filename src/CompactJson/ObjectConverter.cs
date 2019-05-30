@@ -26,12 +26,20 @@ namespace CompactJson
 
         private void AddProperty(MemberInfo memberInfo, Func<object, object> getter, Action<object, object> setter, Type propertyType)
         {
+            // check, if the member should be ignored
+            if (Attribute.IsDefined(memberInfo, typeof(JsonIgnoreMemberAttribute)))
+                return;
+
+            // check, if a custom converter has been assigned
             Type converterType = CustomConverterAttribute.GetConverterType(memberInfo, out object[] converterParameters);
             IConverter converter = ConverterFactoryHelper.CreateConverter(converterType, propertyType, converterParameters);
 
+            // check, if a custom property name should be used
+            JsonPropertyAttribute jsonProperty = memberInfo.GetCustomAttribute<JsonPropertyAttribute>(true);
+
             mProps.Add(memberInfo.Name, new PropInfo
             {
-                Name = memberInfo.Name,
+                Name = jsonProperty?.Name ?? memberInfo.Name,
                 Setter = setter,
                 Getter = getter,
                 Converter = converter,
@@ -52,7 +60,7 @@ namespace CompactJson
         {
             mProps.Clear();
 
-            foreach (var property in Type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.SetProperty | BindingFlags.GetProperty))
+            foreach (PropertyInfo property in Type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty))
                 AddProperty(property, CreateGet(property), CreateSet(property), property.PropertyType);
 
             foreach (FieldInfo field in Type.GetFields(BindingFlags.Instance | BindingFlags.Public))
