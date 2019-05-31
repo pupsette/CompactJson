@@ -81,7 +81,7 @@ There are converters already registered for the following types:
 * `Guid` / `Guid?`
 * `JsonValue` / `JsonObject` / `JsonArray` / `JsonNumber` / `JsonBoolean` / `JsonString`
 * `List<T>`
-* `Array<T>`
+* `T[]`
 * `Dictionary<string, T>` (maps to a JSON object, where the dictionary keys are JSON properties)
 * `Enum` (enumeration values are currently encoded as string)
 
