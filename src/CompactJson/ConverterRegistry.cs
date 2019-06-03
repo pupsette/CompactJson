@@ -52,13 +52,20 @@ namespace CompactJson
         }
 
         /// <summary>
-        /// Adds a converter for a specific .NET type at a global scope.
+        /// Adds a converter for a specific .NET type at a global scope. If a converter for
+        /// the type is already present, it will be replaced by the given one.
         /// </summary>
         /// <param name="converter">The converter to add.</param>
         public static void AddConverter(IConverter converter)
         {
+            if (converter == null)
+                throw new ArgumentNullException(nameof(converter));
+
+            if (converter.Type == null)
+                throw new ArgumentException($"The 'Type' property of the given converter ({converter}) must not be null.");
+
             lock (CONVERTERS)
-                CONVERTERS.Add(converter.Type, converter);
+                CONVERTERS[converter.Type] = converter;
         }
 
         /// <summary>
@@ -71,6 +78,9 @@ namespace CompactJson
         /// <param name="converterFactory">The converter factory to add.</param>
         public static void AddConverterFactory(IConverterFactory converterFactory)
         {
+            if (converterFactory == null)
+                throw new ArgumentNullException(nameof(converterFactory));
+
             lock (FACTORIES)
                 FACTORIES.Add(converterFactory);
         }
