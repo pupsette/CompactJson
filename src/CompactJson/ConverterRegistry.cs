@@ -20,6 +20,7 @@ namespace CompactJson
     {
         static ConverterRegistry()
         {
+            AddConverter(new ByteArrayConverter());
             AddConverter(new Int32Converter(false));
             AddConverter(new Int32Converter(true));
             AddConverter(new Int64Converter(false));
