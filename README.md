@@ -180,8 +180,14 @@ class LogConfiguration
 
 All the attributes are added to the base type, which is the one that has to be used when deserializing. In our example:
 ```csharp
-List<ConfigurationBase> Serializer.Parse<List<ConfigurationBase>>(json);
+List<ConfigurationBase> configs = Serializer.Parse<List<ConfigurationBase>>(json);
 ```
+Of course, serialization works the same way:
+```
+string json = Serializer.ToString(configs);
+```
+
+The name of the JSON property, which is used to encode the type name can be chosen as a parameter of the `TypedConverterFactory` in the `[CustomConverterAttribute]`. Note, that this property must always appear as first property in the JSON object. Also, the classes themselves should not have a property with the same name.
 
 This example excludes the base type from serialization, because we did not assign a type name. Also there is no reflection involved, trying to determine all sub classes! Only the type name assignments at your base class makes the type visible to the serializer.
 
