@@ -9,7 +9,7 @@
     <Description>A very compact, yet flexible, JSON serializer for .NET applications and libraries.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageProjectUrl>https://github.com/pupsette/CompactJson</PackageProjectUrl>
-    <Authors>Matthias Hess</Authors>
+    <Authors>pupsette</Authors>
     <Version>0.6.0</Version>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
     <Configurations>Debug;Release;Sources</Configurations>

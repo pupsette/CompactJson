@@ -7,8 +7,8 @@
     <description>C# source code package for embedding a very compact JSON serializer in C# applications and libraries.</description>
     <licenseUrl>https://mit-license.org/</licenseUrl>
     <projectUrl>https://github.com/pupsette/CompactJson</projectUrl>
-    <owners>Matthias Hess</owners>
-    <authors>Matthias Hess</authors>
+    <owners>pupsette</owners>
+    <authors>pupsette</authors>
     <contentFiles>
       <files include="cs/any/**/*.cs" buildAction="Compile" />
     </contentFiles>
