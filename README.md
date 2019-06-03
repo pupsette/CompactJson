@@ -237,7 +237,7 @@ If you want to apply your own custom converter for `DateTime` objects globally, 
 
 ## JSON Object Model
 
-If you want don't want to convert to a custom .NET class during deserialization, you can do so by using the classes derived from `JsonValue`. You may also represent a part of a custom .NET class as generic JSON data by adding `JsonValue` or any derived class as property or field to your custom class. For example:
+If you don't want to convert to a specific custom .NET class during deserialization, you can do so by using the classes derived from `JsonValue`. You may also represent a part of a custom .NET class as generic JSON data by adding `JsonValue` or any derived class as property or field to your custom class. For example:
 ```csharp
 class OperationParameter
 {
