@@ -172,7 +172,7 @@ The JSON probably looks like this:
   },
   {
     "Type": "Log",
-    "Name": "proxy log config"
+    "Name": "proxy log config",
     "LogFolder": "./logs"
   }
 ]
