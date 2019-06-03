@@ -100,6 +100,25 @@ The property or field name is kept as-is. If you want to use a different name wh
 
 :heavy_exclamation_mark: Trying to parse into a `readonly` field will throw an exception during deserialization. Also parsing into a property without setter will fail.
 
+Properties and fields may also be excluded from serialization/deserialization by using the `[JsonIgnoreMember]` attribute.
+
+Example:
+```csharp
+class User
+{
+    [JsonIgnoreMember]
+    public Guid InternalId { get; set; }
+
+    [JsonProperty("UserName")]
+    public string Name { get; set; }
+
+    public string EMail { get; set; }
+
+    [JsonProperty]
+    private string Account;
+}
+```
+
 ### Default Values
 
 During serialization, default values will not be emitted by default. If you want to serialize a property or field in any case, you need to add the `[EmitDefaultValue]` attribute to it.
