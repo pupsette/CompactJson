@@ -17,6 +17,8 @@ string json = Serializer.ToString(new int[] {1,2,3}, false);
 ```
 where the boolean parameter decides whether to indent (pretty-print) the JSON or not.
 
+There are also overloads for streaming to a `TextWriter` or parsing from a `TextReader`.
+
 When serializing classes and structs the public properties (with public getter *and* setter) and fields will be serialized and deserialized by default. For example:
 ```csharp
 enum JobState
@@ -79,11 +81,12 @@ There are converters already registered for the following types:
 * `bool`
 * `DateTime` / `DateTime?` (see DateTime Formatting below)
 * `Guid` / `Guid?`
-* `JsonValue` / `JsonObject` / `JsonArray` / `JsonNumber` / `JsonBoolean` / `JsonString`
+* `byte[]` (base64 encoded)
+* `JsonValue` / `JsonObject` / `JsonArray` / `JsonNumber` / `JsonBoolean` / `JsonString` (see 'JSON Object Model' below.
 * `List<T>`
 * `T[]`
 * `Dictionary<string, T>` (maps to a JSON object, where the dictionary keys are JSON properties)
-* `Enum` (enumeration values are currently encoded as string)
+* `Enum` (enumeration values are encoded as string)
 
 ## Classes and Structs
 
@@ -92,6 +95,8 @@ For converting from JSON to custom .NET classes and back there are a few rules, 
 1. All public fields
 2. All public properties (with public getter and setter)
 3. Properties and fields with the `[JsonProperty]` attribute
+
+The property or field name is kept as-is. If you want to use a different name when converting to JSON, you have to assign it using the `[JsonProperty("myCustomName")]` attribute.
 
 :heavy_exclamation_mark: Trying to parse into a `readonly` field will throw an exception during deserialization. Also parsing into a property without setter will fail.
 
@@ -202,3 +207,18 @@ When serializing, the milliseconds part will be omitted, if this part is 000. Al
 When deserializing, one of the above formats is expected, otherwise an exception is thrown. The resulting DateTime object will have the DateTimeKind set according to the encountered suffix. Keep in mind, that serializer and deserializer might have different UTC offsets. In this case, you cannot expect the deserialization and subsequent serialization to reproduce the input string.
 
 If you want to apply your own custom converter for `DateTime` objects globally, overwrite the registered converter simply by adding it to the static `ConverterRegistry` (make sure, the `Type` property of your converter implementation returns `typeof(DateTime)`). Keep in mind, that the nullable variant `DateTime?` has a dedicated converter!
+
+## JSON Object Model
+
+If you want don't want to convert to a custom .NET class during deserialization, you can do so by using the classes derived from `JsonValue`. You may also represent a part of a custom .NET class as generic JSON data by adding `JsonValue` or any derived class as property or field to your custom class. For example:
+```csharp
+class OperationParameter
+{
+    public string ParameterName { get; set; }
+    public JsonValue ParameterValue { get; set; }
+}
+```
+
+This allows you to inspect the contents of the `ParameterValue` at a later stage after deserialization. Another use-case is to simply pass JSON data from one component to another without actually interpreting it.
+
+Using a more specific sub class of `JsonValue` is understood as a constraint during deserialization. For example using `JsonObject` as type for the `ParameterValue` property will make the serializer throw an exception, if anything but `null` or `{ [...] }` is encountered during deserialization.
