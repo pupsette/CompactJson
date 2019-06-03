@@ -166,11 +166,13 @@ The JSON probably looks like this:
 [
   {
     "Type": "Service",
+    "Name": "proxy endpoint config",
     "ServiceName": "Proxy",
     "Endpoint": "http://localhost:9111/proxy"
   },
   {
     "Type": "Log",
+    "Name": "proxy log config"
     "LogFolder": "./logs"
   }
 ]
@@ -186,12 +188,12 @@ class ConfigurationBase
 {
     public string Name { get; set; }
 }
-class ServiceConfiguration
+class ServiceConfiguration : ConfigurationBase
 {
     public string ServiceName { get; set; }
     public string Endpoint { get; set; }
 }
-class LogConfiguration
+class LogConfiguration : ConfigurationBase
 {
     public string LogFolder { get; set; }
 }
