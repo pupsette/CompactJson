@@ -8,6 +8,9 @@
     <Title>Fast and lightweight JSON serializer for .NET</Title>
     <Description>A very compact, yet flexible, JSON serializer for .NET applications and libraries.</Description>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <PackageTags>json;serializer;parser;.net</PackageTags>
+    <RepositoryUrl>https://github.com/pupsette/CompactJson.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/pupsette/CompactJson</PackageProjectUrl>
     <Authors>pupsette</Authors>
     <Version>0.6.0</Version>
@@ -17,7 +20,7 @@
 
   <PropertyGroup Condition="'$(Configuration)' == 'Sources'">
     <NuspecFile>CompactJson.Source.nuspec</NuspecFile>
-    <NuspecProperties>version=$(Version)</NuspecProperties>
+    <NuspecProperties>version=$(Version);authors=$(Authors);projectUrl=$(PackageProjectUrl);repository=$(RepositoryUrl);licenseUrl=$(PackageLicenseUrl)</NuspecProperties>
   </PropertyGroup>
 
 </Project>

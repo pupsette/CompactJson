@@ -3,12 +3,13 @@
   <metadata>
     <id>CompactJson.Sources</id>
     <version>$version$</version>
+    <authors>$authors$</authors>
+    <licenseUrl>$licenseUrl$</licenseUrl>
+    <projectUrl>$projectUrl$</projectUrl>
+    <repository type="git" url="$repository$"></repository>
     <title>Fast and lightweight JSON serializer source code for embedding in C# projects</title>
     <description>C# source code package for embedding a very compact JSON serializer in C# applications and libraries.</description>
-    <licenseUrl>https://mit-license.org/</licenseUrl>
-    <projectUrl>https://github.com/pupsette/CompactJson</projectUrl>
-    <owners>pupsette</owners>
-    <authors>pupsette</authors>
+    <tags>json serializer parser .net</tags>
     <contentFiles>
       <files include="cs/any/**/*.cs" buildAction="Compile" />
     </contentFiles>
