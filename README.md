@@ -4,21 +4,21 @@ Embedding the source code of this JSON serializer into your own library reduces 
 
 ## Usage
 For simple conversions from a JSON string to a .NET object:
-```
+```csharp
 int[] model = (int[])Serializer.Parse("[1,2,3]", typeof(int[]));
 ```
 or the generic version:
-```
+```csharp
 int[] model = Serializer.Parse<int[]>("[1,2,3]");
 ```
 and vice-versa:
-```
+```csharp
 string json = Serializer.ToString(new int[] {1,2,3}, false);
 ```
 where the boolean parameter decides whether to indent (pretty-print) the JSON or not.
 
 When serializing classes and structs the public properties (with public getter *and* setter) and fields will be serialized and deserialized by default. For example:
-```
+```csharp
 enum JobState
 {
     Running,
@@ -41,7 +41,7 @@ For more details and options regarding serialization of classes and struct, see 
 Converters are responsible for 'converting' between JSON-like data and .NET objects. They are registered globally at the static *ConverterRegistry*. You may customize the serialization and deserialization by adding your own converters. The interface that you need to implement is *IConverter*. It has methods for all the possible JSON input tokens (like *string*, *number*, *array*). In general, custom converters are very specific and so we recommend deriving from *ConverterBase* which refuses all input tokens by default and you have to override the accepted ones.
 
 Here's an example of a converter implementation for the .NET GUID class.
-```
+```csharp
 class GuidConverter : ConverterBase
 {
     public GuidConverter() : base(typeof(Guid))
@@ -62,7 +62,7 @@ class GuidConverter : ConverterBase
 Note, that this implementation does not accept a JSON *null* value! If you want to allow *null* values, you should use the *NullableConverterBase* instead of *ConverterBase* in order to control the behavior with a constructor parameter.
 
 The converter is then added to the *ConverterRegistry* like this:
-```
+```csharp
 ConverterRegistry.AddConverter(new GuidConverter());
 ```
 
@@ -87,8 +87,118 @@ There are converters already registered for the following types:
 
 ## Classes and Structs
 
-TODO
+### Properties and Fields
+For converting from JSON to custom .NET classes and back there are a few rules, that are applied to the fields and properties of the custom class. The following members will be included during serialization/deserialization:
+1. All public fields
+2. All public properties (with public getter and setter)
+3. Properties and fields with the `[JsonProperty]` attribute
+
+:heavy_exclamation_mark: Trying to parse into a `readonly` field will throw an exception during deserialization. Also parsing into a property without setter will fail.
+
+### Default Values
+
+During serialization, default values will not be emitted by default. If you want to serialize a property or field in any case, you need to add the `[EmitDefaultValue]` attribute to it.
+
+For example, consider the following class:
+```csharp
+class User
+{
+    public string Name { get; set; }
+    public string EMail { get; set; }
+    public string Phone { get; set; }
+}
+```
+If this one gets default-constructed and serialized
+```csharp
+string json = Serializer.ToString(new User());
+```
+the resulting JSON will look like this:
+```
+{}
+```
+
+Adding the `[EmitDefaultValue]` attribute changes the behavior.
+```csharp
+class User
+{
+    [EmitDefaultValue]
+    public string Name { get; set; }
+    public string EMail { get; set; }
+    public string Phone { get; set; }
+}
+```
+now, serialization yields:
+```
+{"Name":null}
+```
+
+:heavy_exclamation_mark: Note, that _default_ values are the language defined default values, which can be obtained by the `default` keyword in C#. Property and field initialization (e.g. from your constructor) does not define the _default_ value.
+
+### Including Type Information
+
+Often, when deserializing JSON you may want to map JSON objects to .NET classes according to type information in your JSON. Consider the following example:
+The JSON probably looks like this:
+```json
+[
+  {
+    "Type": "Service",
+    "ServiceName": "Proxy",
+    "Endpoint": "http://localhost:9111/proxy"
+  },
+  {
+    "Type": "Log",
+    "LogFolder": "./logs"
+  }
+]
+```
+
+JSON objects don't carry type information, unless it has been added explicitly. In this example we want the deserializer to choose the .NET class according to the `Type` property. In order to do so, we must add attributes for assigning the type names as well as using the `TypedConverterFactory`. Like this:
+
+```csharp
+[TypeName(typeof(ServiceConfiguration), "Service")]
+[TypeName(typeof(LogConfiguration), "Log")]
+[CustomConverter(typeof(TypedConverterFactory), "Type")]
+class ConfigurationBase
+{
+    public string Name { get; set; }
+}
+class ServiceConfiguration
+{
+    public string ServiceName { get; set; }
+    public string Endpoint { get; set; }
+}
+class LogConfiguration
+{
+    public string LogFolder { get; set; }
+}
+```
+
+All the attributes are added to the base type, which is the one that has to be used when deserializing. In our example:
+```csharp
+List<ConfigurationBase> Serializer.Parse<List<ConfigurationBase>>(json);
+```
+
+This example excludes the base type from serialization, because we did not assign a type name. Also there is no reflection involved, trying to determine all sub classes! Only the type name assignments at your base class makes the type visible to the serializer.
+
+If your application determines supported types at run-time you can create a custom converter factory, which creates a `TypedConverter` by passing your own implementation of `ITypeNameResolver`.
 
 ## DateTime Formatting
 
-TODO
+.NET `DateTime` values will be encoded as JSON string. The serialized DateTime string is ISO 8601 conformant, however
+it does not convert all possible ISO 8601 representations to a DateTime object.
+
+Allowed formats (examples):
+* 2010-08-22T09:15:00
+* 2010-08-22T09:15:00.910
+* 2010-08-22T09:15:00Z
+* 2010-08-22T09:15:00.910Z
+* 2010-08-22T09:15:00+01:30
+* 2010-08-22T09:15:00-03:00
+* 2010-08-22T09:15:00.911+01:30
+* 2010-08-22T09:15:00.911-03:00
+
+When serializing, the milliseconds part will be omitted, if this part is 000. Also the 'Z' indicator will only be appended, if the DateTime object has the DateTimeKind.Utc. The UTC offset (+/-) will only be appended, if the DateTime object has the DateTimeKind.Local. If the DateTime object has DateTimeKind.Unspecified, there will be no suffix appended.
+
+When deserializing, one of the above formats is expected, otherwise an exception is thrown. The resulting DateTime object will have the DateTimeKind set according to the encountered suffix. Keep in mind, that serializer and deserializer might have different UTC offsets. In this case, you cannot expect the deserialization and subsequent serialization to reproduce the input string.
+
+If you want to apply your own custom converter for `DateTime` objects globally, overwrite the registered converter simply by adding it to the static `ConverterRegistry` (make sure, the `Type` property of your converter implementation returns `typeof(DateTime)`). Keep in mind, that the nullable variant `DateTime?` has a dedicated converter!
