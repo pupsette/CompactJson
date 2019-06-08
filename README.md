@@ -19,6 +19,9 @@ Performance has been compared to `Newtonsoft.Json` by a very small and simple be
 
 As usual: performance measurements have to be interpreted carefully. For details about test execution, have a look at the code.
 
+## Installation
+Add either the `CompactJson` or the `CompactJson.Sources` Nuget package to your project. See the [packages on Nuget](https://www.nuget.org/profiles/pupsette).
+
 ## Usage
 For simple conversions from a JSON string to a .NET object:
 ```csharp
