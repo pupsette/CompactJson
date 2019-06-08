@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CompactJson", "CompactJson\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CompactJson.Tests", "CompactJson.Tests\CompactJson.Tests.csproj", "{176309D7-081B-4CAE-B48C-4A9E3F6FD565}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CompactJson.Benchmark", "CompactJson.Benchmark\CompactJson.Benchmark.csproj", "{4843A2B7-1F7B-40D4-9C62-EF8D528EF476}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,6 +27,11 @@ Global
 		{176309D7-081B-4CAE-B48C-4A9E3F6FD565}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{176309D7-081B-4CAE-B48C-4A9E3F6FD565}.Release|Any CPU.Build.0 = Release|Any CPU
 		{176309D7-081B-4CAE-B48C-4A9E3F6FD565}.Sources|Any CPU.ActiveCfg = Release|Any CPU
+		{4843A2B7-1F7B-40D4-9C62-EF8D528EF476}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4843A2B7-1F7B-40D4-9C62-EF8D528EF476}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4843A2B7-1F7B-40D4-9C62-EF8D528EF476}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4843A2B7-1F7B-40D4-9C62-EF8D528EF476}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4843A2B7-1F7B-40D4-9C62-EF8D528EF476}.Sources|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
