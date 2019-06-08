@@ -1,6 +1,23 @@
 # CompactJson
 Fast lightweight JSON serializer for .NET. Distributed as .NET library and C# source code.
-Embedding the source code of this JSON serializer into your own library reduces dependencies to other wide-spread JSON parsing libraries.
+
+## Why another JSON serializer?
+This serializer is primarily designed to be embedded into other .NET libraries written in C#. This reduces dependencies to other wide-spread JSON parsing libraries.
+
+## Features & Performance
+The supported set of features has been reduced to the very basics by design. For example, you cannot control the order of class members during serialization. Also, CompactJson does not ship converters for `HashSet<T>` or `LinkedList<T>` (you may write your own Converter, of course). The intention is to keep it small and simple.
+
+Performance has been compared to `Newtonsoft.Json` by a very small and simple benchmark, which is part of the source code repository. Execution on an i5-3550 showed the following results:
+
+|               | Newtonsoft.Json (12.0.2) | CompactJson |
+| ------------- | ------------- | ---------- |
+| Warm-up  | 209ms  | 61ms |
+| Serialization (small object graphs, total 406MB)  | 8.5s | 6.1s |
+| Serialization (large object graphs, total 445MB)  | 9.1s | 6.8s |
+| Deserialization (small object graphs, total 406MB)  | 12.1s | 7.7s |
+| Deserialization (large object graphs, total 445MB)  | 14.7s | 11.2s |
+
+As usual: performance measurements have to be interpreted carefully. For details about test execution, have a look at the code.
 
 ## Usage
 For simple conversions from a JSON string to a .NET object:
