@@ -53,11 +53,49 @@ namespace CompactJson.Tests
         [TestCase("{}", typeof(TestClassNested), "{}")]
         [TestCase("null", typeof(TestClassNested), "null")]
         [TestCase("{}", typeof(TestClassIgnoredMember), "{\"Valid\":\"Valid\"}")]
+        [TestCase("{}", typeof(TestClassEmbeddedJsonValue), "{\"TestValue\":33}")]
+        [TestCase("{\"Anything\":null}", typeof(TestClassEmbeddedJsonValue), "{\"Anything\":null,\"TestValue\":33}")]
+        [TestCase("{\"Anything\":[1]}", typeof(TestClassEmbeddedJsonValue), "{\"Anything\":[1],\"TestValue\":33}")]
+        [TestCase("{\"Anything\":{}}", typeof(TestClassEmbeddedJsonValue), "{\"Anything\":{},\"TestValue\":33}")]
+        [TestCase("{\"Anything\":true}", typeof(TestClassEmbeddedJsonValue), "{\"Anything\":true,\"TestValue\":33}")]
+        [TestCase("{\"NotAnything\":{}}", typeof(TestClassEmbeddedJsonObject), "{\"NotAnything\":{},\"TestValue\":33}")]
+        [TestCase("{\"NotAnything\":null}", typeof(TestClassEmbeddedJsonObject), "{\"TestValue\":33}")]
+        [TestCase("{}", typeof(TestClassEmbeddedJsonObject), "{\"TestValue\":33}")]
         public void Conversion_to_model_and_back(string input, Type type, string expectedOutput)
         {
             object model = Serializer.Parse(input, type);
             string output = Serializer.ToString(model, false);
             Assert.That(output, Is.EqualTo(expectedOutput));
+        }
+
+        [TestCase("{\"NotAnything\":\"\"}", typeof(TestClassEmbeddedJsonObject))]
+        public void Conversion_to_model_should_fail(string input, Type type)
+        {
+            Exception error = null;
+            try
+            {
+                Serializer.Parse(input, type);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                error = ex;
+            }
+            Assert.That(error, Is.Not.Null);
+        }
+
+        private class TestClassEmbeddedJsonValue
+        {
+            public JsonValue Anything { get; set; }
+
+            public int TestValue { get; set; } = 33;
+        }
+
+        private class TestClassEmbeddedJsonObject
+        {
+            public JsonObject NotAnything { get; set; }
+
+            public int TestValue { get; set; } = 33;
         }
     }
 }
