@@ -398,6 +398,7 @@ namespace CompactJson
                         }
                     }
                     mValidProperty = false;
+                    return;
                 }
                 mValidProperty = mProps.TryGetValue(propertyName, out mCurrentPropInfo);
             }

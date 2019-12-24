@@ -5,7 +5,7 @@ namespace CompactJson
 {
     /// <summary>
     /// A base class for converters which are capable of converting
-    /// collections. It provides the ElementConveter property and
+    /// collections. It provides the ElementConverter property and
     /// an implementation of the <see cref="Write(object, IJsonConsumer)"/>
     /// method which writes a JSON array while expecting the given object
     /// to be <see cref="IEnumerable"/>.
