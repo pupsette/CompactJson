@@ -66,7 +66,7 @@ namespace CompactJson
             Parser.ParseValue(tokenizer, consumer);
 
             if (tokenizer.CurrentToken.Type != Tokenizer.Token.None)
-                throw new Exception("UNEXPECTED INPUT DATA AFTER END");
+                throw new ParserException($"Unexpected input data '{tokenizer.CurrentToken}' after end of JSON entity in line {tokenizer.CurrentToken.LineNo} at position {tokenizer.CurrentToken.Position}.", tokenizer.CurrentToken.LineNo, tokenizer.CurrentToken.Position);
         }
 
         /// <summary>
@@ -179,10 +179,10 @@ namespace CompactJson
                 for (; ; )
                 {
                     if (tokenizer.CurrentToken.Type == Tokenizer.Token.None)
-                        throw new Exception($"Unexpected end of stream reached while parsing object in line {tokenizer.CurrentToken.LineNo} at position {tokenizer.CurrentToken.Position}.");
+                        throw new ParserException($"Unexpected end of stream reached while parsing object in line {tokenizer.CurrentToken.LineNo} at position {tokenizer.CurrentToken.Position}.", tokenizer.CurrentToken.LineNo, tokenizer.CurrentToken.Position);
 
                     if (tokenizer.CurrentToken.Type != Tokenizer.Token.String)
-                        throw new Exception($"Unexpected token in line {tokenizer.CurrentToken.LineNo} at position {tokenizer.CurrentToken.Position}. Property name was expected.");
+                        throw new ParserException($"Unexpected token in line {tokenizer.CurrentToken.LineNo} at position {tokenizer.CurrentToken.Position}. Property name was expected.", tokenizer.CurrentToken.LineNo, tokenizer.CurrentToken.Position);
 
                     // expect string literal
                     consumer.PropertyName(tokenizer.CurrentToken.StringValue);
@@ -190,16 +190,16 @@ namespace CompactJson
                     // expect ':'
                     tokenizer.MoveNext();
                     if (tokenizer.CurrentToken.Type == Tokenizer.Token.None)
-                        throw new Exception($"Unexpected end of stream reached while parsing object in line {tokenizer.CurrentToken.LineNo} at position {tokenizer.CurrentToken.Position}.");
+                        throw new ParserException($"Unexpected end of stream reached while parsing object in line {tokenizer.CurrentToken.LineNo} at position {tokenizer.CurrentToken.Position}.", tokenizer.CurrentToken.LineNo, tokenizer.CurrentToken.Position);
                     if (tokenizer.CurrentToken.Type != Tokenizer.Token.Colon)
-                        throw new Exception($"Unexpected token in line {tokenizer.CurrentToken.LineNo} at position {tokenizer.CurrentToken.Position}. ':' was expected.");
+                        throw new ParserException($"Unexpected token in line {tokenizer.CurrentToken.LineNo} at position {tokenizer.CurrentToken.Position}. ':' was expected.", tokenizer.CurrentToken.LineNo, tokenizer.CurrentToken.Position);
 
                     // parse value
                     tokenizer.MoveNext(); // skip ':'
                     ParseValue(tokenizer, consumer);
 
                     if (tokenizer.CurrentToken.Type == Tokenizer.Token.None)
-                        throw new Exception($"Unexpected end of stream reached while parsing object in line {tokenizer.CurrentToken.LineNo} at position {tokenizer.CurrentToken.Position}.");
+                        throw new ParserException($"Unexpected end of stream reached while parsing object in line {tokenizer.CurrentToken.LineNo} at position {tokenizer.CurrentToken.Position}.", tokenizer.CurrentToken.LineNo, tokenizer.CurrentToken.Position);
                     if (tokenizer.CurrentToken.Type == Tokenizer.Token.CurlyClose)
                     {
                         tokenizer.MoveNext(); // skip '}'
@@ -207,7 +207,7 @@ namespace CompactJson
                         return;
                     }
                     if (tokenizer.CurrentToken.Type != Tokenizer.Token.Comma)
-                        throw new Exception($"Unexpected token in line {tokenizer.CurrentToken.LineNo} at position {tokenizer.CurrentToken.Position}. Either '}}' or ',' was expected.");
+                        throw new ParserException($"Unexpected token in line {tokenizer.CurrentToken.LineNo} at position {tokenizer.CurrentToken.Position}. Either '}}' or ',' was expected.", tokenizer.CurrentToken.LineNo, tokenizer.CurrentToken.Position);
 
                     tokenizer.MoveNext(); // skip ','
                 }
@@ -218,7 +218,7 @@ namespace CompactJson
                 tokenizer.MoveNext(); // skip '['
 
                 if (tokenizer.CurrentToken.Type == Tokenizer.Token.None)
-                    throw new Exception($"Unexpected end of stream reached while parsing array in line {tokenizer.CurrentToken.LineNo} at position {tokenizer.CurrentToken.Position}.");
+                    throw new ParserException($"Unexpected end of stream reached while parsing array in line {tokenizer.CurrentToken.LineNo} at position {tokenizer.CurrentToken.Position}.", tokenizer.CurrentToken.LineNo, tokenizer.CurrentToken.Position);
 
                 if (tokenizer.CurrentToken.Type == Tokenizer.Token.SquaredClose)
                 {
@@ -241,16 +241,16 @@ namespace CompactJson
                         return;
                     }
                     else if (tokenizer.CurrentToken.Type == Tokenizer.Token.None)
-                        throw new Exception($"Unexpected end of stream reached while parsing array in line {tokenizer.CurrentToken.LineNo} at position {tokenizer.CurrentToken.Position}.");
+                        throw new ParserException($"Unexpected end of stream reached while parsing array in line {tokenizer.CurrentToken.LineNo} at position {tokenizer.CurrentToken.Position}.", tokenizer.CurrentToken.LineNo, tokenizer.CurrentToken.Position);
                     else
-                        throw new Exception($"Unexpected token in line {tokenizer.CurrentToken.LineNo} at position {tokenizer.CurrentToken.Position}. Either ']' or ',' was expected.");
+                        throw new ParserException($"Unexpected token in line {tokenizer.CurrentToken.LineNo} at position {tokenizer.CurrentToken.Position}. Either ']' or ',' was expected.", tokenizer.CurrentToken.LineNo, tokenizer.CurrentToken.Position);
                 }
             }
 
             public static void ParseValue(Tokenizer tokenizer, IJsonConsumer consumer)
             {
                 if (tokenizer.CurrentToken.Type == Tokenizer.Token.None)
-                    throw new Exception($"Unexpected end of stream reached in line {tokenizer.CurrentToken.LineNo} at position {tokenizer.CurrentToken.Position}.");
+                    throw new ParserException($"Unexpected end of stream reached in line {tokenizer.CurrentToken.LineNo} at position {tokenizer.CurrentToken.Position}.", tokenizer.CurrentToken.LineNo, tokenizer.CurrentToken.Position);
 
                 if (tokenizer.CurrentToken.Type == Tokenizer.Token.CurlyOpen)
                 {
@@ -274,7 +274,7 @@ namespace CompactJson
                 else if (tokenizer.CurrentToken.Type == Tokenizer.Token.Null)
                     consumer.Null();
                 else
-                    throw new Exception($"Expected value in line {tokenizer.CurrentToken.LineNo} at position {tokenizer.CurrentToken.Position}, but found '{tokenizer.CurrentToken}'.");
+                    throw new ParserException($"Expected value in line {tokenizer.CurrentToken.LineNo} at position {tokenizer.CurrentToken.Position}, but found '{tokenizer.CurrentToken}'.", tokenizer.CurrentToken.LineNo, tokenizer.CurrentToken.Position);
 
                 tokenizer.MoveNext(); // skip value literal
             }
@@ -501,9 +501,9 @@ namespace CompactJson
                         else
                         {
                             if (c < 32)
-                                throw new Exception($"Unexpected control character 0x{(int)c:X2} in line {lineNo} at position {columnIndex}.");
+                                throw new ParserException($"Unexpected control character 0x{(int)c:X2} in line {lineNo} at position {columnIndex}.", lineNo, columnIndex);
                             else
-                                throw new Exception($"Unexpected character '{c}' in line {lineNo} at position {columnIndex}.");
+                                throw new ParserException($"Unexpected character '{c}' in line {lineNo} at position {columnIndex}.", lineNo, columnIndex);
                         }
                     }
                 }
@@ -517,7 +517,7 @@ namespace CompactJson
                 {
                     char c = NextChar();
                     if (c == (char)0)
-                        throw new Exception($"Unexpected end of stream reached while parsing string in line {lineNo} at position {columnIndex}.");
+                        throw new ParserException($"Unexpected end of stream reached while parsing string in line {lineNo} at position {columnIndex}.", lineNo, columnIndex);
 
                     if (escaped)
                     {
@@ -554,7 +554,7 @@ namespace CompactJson
                                     char hex3 = NextChar();
                                     char hex4 = NextChar();
                                     if (hex1 == 0 || hex2 == 0 || hex3 == 0 || hex4 == 0)
-                                        throw new Exception($"Unexpected end of stream reached while parsing unicode escape sequence in line {lineNo} at position {columnIndex}.");
+                                        throw new ParserException($"Unexpected end of stream reached while parsing unicode escape sequence in line {lineNo} at position {columnIndex}.", lineNo, columnIndex);
 
                                     // parse the 32 bit hex into an integer codepoint
                                     uint codePoint = ParseUnicode(hex1, hex2, hex3, hex4);
@@ -562,7 +562,7 @@ namespace CompactJson
                                 }
                                 break;
                             default:
-                                throw new Exception($"Invalid character '{c}' in escape sequence in line {lineNo} at position {columnIndex}.");
+                                throw new ParserException($"Invalid character '{c}' in escape sequence in line {lineNo} at position {columnIndex}.", lineNo, columnIndex);
                         }
                         escaped = false;
                     }
@@ -577,7 +577,7 @@ namespace CompactJson
                     else
                     {
                         if (c < 32)
-                            throw new Exception($"Unexpected control character 0x{(int)c:X2} in string literal in line {lineNo} at position {columnIndex}.");
+                            throw new ParserException($"Unexpected control character 0x{(int)c:X2} in string literal in line {lineNo} at position {columnIndex}.", lineNo, columnIndex);
 
                         mStringBuilder.Append(c);
                     }
@@ -612,10 +612,10 @@ namespace CompactJson
                 {
                     char c = NextChar();
                     if (c == 0 && (mCurrentIndex >= mBufferEnd))
-                        throw new Exception($"Unexpected end of stream reached while '{expected}' was expected.");
+                        throw new ParserException($"Unexpected end of stream reached while '{expected}' was expected in line {lineNo} at position {columnIndex}.", lineNo, columnIndex);
 
                     if (c != expected[i])
-                        throw new Exception($"Expected '{expected}' at position {columnIndex} in line {lineNo}, but found '{expected.Substring(0, i) + c}'.");
+                        throw new ParserException($"Expected '{expected}' at position {columnIndex} in line {lineNo}, but found '{expected.Substring(0, i) + c}'.", lineNo, columnIndex);
                 }
             }
 
@@ -636,7 +636,7 @@ namespace CompactJson
                     {
                         mStringBuilder.Append(NextChar());
                         if (dotAppeared)
-                            throw new Exception($"The dot '.' must not appear twice in the number literal {mStringBuilder} in line {lineNo} at position {columnIndex}.");
+                            throw new ParserException($"The dot '.' must not appear twice in the number literal {mStringBuilder} in line {lineNo} at position {columnIndex}.", lineNo, columnIndex);
                         dotAppeared = true;
                     }
                     else if (c == 'E' || c == 'e')
@@ -653,13 +653,13 @@ namespace CompactJson
                 if (dotAppeared || exponentAppeared)
                 {
                     if (!double.TryParse(mStringBuilder.ToString(), System.Globalization.NumberStyles.Float, CultureInfo.InvariantCulture, out tokenData.FloatValue))
-                        throw new Exception($"Invalid number '{mStringBuilder}' in line {lineNo} at position {columnIndex}.");
+                        throw new ParserException($"Invalid number '{mStringBuilder}' in line {lineNo} at position {columnIndex}.", lineNo, columnIndex);
                     tokenData.Type = Token.NumberFloat;
                 }
                 else
                 {
                     if (!long.TryParse(mStringBuilder.ToString(), System.Globalization.NumberStyles.Integer, CultureInfo.InvariantCulture, out tokenData.IntegerValue))
-                        throw new Exception($"Invalid number '{mStringBuilder}' in line {lineNo} at position {columnIndex}.");
+                        throw new ParserException($"Invalid number '{mStringBuilder}' in line {lineNo} at position {columnIndex}.", lineNo, columnIndex);
                     tokenData.Type = Token.NumberInteger;
                 }
             }

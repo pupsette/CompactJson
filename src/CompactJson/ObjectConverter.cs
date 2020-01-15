@@ -120,15 +120,6 @@ namespace CompactJson
             return Expression.Convert(expression, targetType);
         }
 
-        //private static Func<object, bool> CreateTypeEquals(Type type)
-        //{
-        //    ParameterExpression valueParameter =  Expression.Parameter(typeof(object), "value");
-        //    MethodInfo mi = typeof(object).GetMethod("GetType");
-        //    Expression.Call(valueParameter)
-        //    Expression expr = Expression.TypeIs(valueParameter, type);
-        //    return (Func<object, bool>)Expression.Lambda(typeof(Func<object, bool>), expr, valueParameter).Compile();
-        //}
-
         private static Func<object, object> CreateGet(FieldInfo fieldInfo)
         {
             ParameterExpression instanceParameter = Expression.Parameter(typeof(object), "instance");
