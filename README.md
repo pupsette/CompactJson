@@ -60,7 +60,7 @@ For more details and options regarding serialization of classes and struct, see 
 
 ## Converters
 
-Converters are responsible for 'converting' between JSON-like data and .NET objects. They are registered globally at the static *ConverterRegistry*. You may customize the serialization and deserialization by adding your own converters. The interface that you need to implement is *IConverter*. It has methods for all the possible JSON input tokens (like *string*, *number*, *array*). In general, custom converters are very specific and so we recommend deriving from *ConverterBase* which refuses all input tokens by default and you have to override the accepted ones.
+Converters are responsible for 'converting' between JSON-like data and .NET objects. You may customize the serialization and deserialization by implementing your own converters. The interface that you need to implement is *IConverter*. It has methods for all the possible JSON input tokens (like *string*, *number*, *array*). In general, custom converters are very specific and so we recommend deriving from *ConverterBase* which refuses all input tokens by default and you have to override the accepted ones.
 
 Here's an example of a converter implementation for the .NET GUID class.
 ```csharp
@@ -83,12 +83,28 @@ class GuidConverter : ConverterBase
 ```
 Note, that this implementation does not accept a JSON *null* value! If you want to allow *null* values, you should use the *NullableConverterBase* instead of *ConverterBase* in order to control the behavior with a constructor parameter.
 
-The converter is then added to the *ConverterRegistry* like this:
+Once implemented, you may choose to register it globally at the static *ConverterRegistry* or to use it for individual properties by adding the *CustomConverter* attribute.
+
+### Global Converter Registration
+
+The converter may then added to the *ConverterRegistry* like this:
 ```csharp
 ConverterRegistry.AddConverter(new GuidConverter());
 ```
 
-For more advanced converters, you may want to add a custom implementation of *IConverterFactory*. This basically allows you to write converters for a range of types. For example, this is useful if the type you want to convert is a generic type.
+For more advanced converters, you may want to register a custom implementation of *IConverterFactory*. This basically allows you to write converters for a range of types. For example, this is useful if the type you want to convert is a generic type.
+
+### Property-specific Converter
+
+The converter may be also be defined for a specific property like this:
+
+```csharp
+class MyClass
+{
+    [CustomConverter(typeof(GuidConverter))]
+    public Guid ID { get; set; }
+}
+```
 
 ## Supported Types
 
