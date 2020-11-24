@@ -109,12 +109,12 @@ class MyClass
 ## Supported Types
 
 There are converters already registered for the following types:
+* `string`
 * `int` / `int?`
 * `long` / `long?`
 * `float` / `float?`
 * `double` / `double?`
-* `string`
-* `bool`
+* `bool` / `bool?`
 * `DateTime` / `DateTime?` (see DateTime Formatting below)
 * `Guid` / `Guid?`
 * `byte[]` (base64 encoded)
@@ -122,7 +122,7 @@ There are converters already registered for the following types:
 * `List<T>`
 * `T[]`
 * `Dictionary<string, T>` (maps to a JSON object, where the dictionary keys are JSON properties)
-* `Enum` (enumeration values are encoded as string)
+* `Enum` / `Enum?` (enumeration values are encoded as string)
 
 ## Classes and Structs
 
