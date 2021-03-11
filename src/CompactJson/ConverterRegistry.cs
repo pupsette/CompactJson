@@ -43,10 +43,12 @@ namespace CompactJson
             AddConverter(new JsonValueConverter(typeof(JsonBoolean), allowJsonBoolean: true));
             AddConverter(new JsonValueConverter(typeof(JsonString), allowJsonString: true, acceptNull: true));
 
+            // Checking for a suitable converter factory is done in reverse order (last one added, is first one checked)
             AddConverterFactory(new ObjectConverterFactory());
             AddConverterFactory(new ListConverterFactory());
             AddConverterFactory(new ArrayConverterFactory());
             AddConverterFactory(new DictionaryConverterFactory());
+            AddConverterFactory(new NullableConverterFactory());
             AddConverterFactory(new EnumConverterFactory());
             AddConverterFactory(new CustomConverterFactory());
         }

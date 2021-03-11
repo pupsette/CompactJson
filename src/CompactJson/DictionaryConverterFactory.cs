@@ -10,14 +10,15 @@ namespace CompactJson
             if (!type.IsGenericType)
                 return false;
             Type genericTypeDef = type.GetGenericTypeDefinition();
-            return genericTypeDef == typeof(Dictionary<,>) && genericTypeDef.GetGenericArguments()[0] == typeof(string);
+            return (genericTypeDef == typeof(Dictionary<,>) || genericTypeDef == typeof(IDictionary<,>))
+                && genericTypeDef.GetGenericArguments()[0] == typeof(string);
         }
 
         public IConverter Create(Type type, object[] parameters)
         {
             Type genericTypeDef = type.GetGenericTypeDefinition();
-            if (genericTypeDef != typeof(Dictionary<,>))
-                throw new ArgumentException($"Type '{type}' was expected to be a generic Dictionary<,>.");
+            if (genericTypeDef != typeof(Dictionary<,>) && genericTypeDef != typeof(IDictionary<,>))
+                throw new ArgumentException($"Type '{type}' was expected to be a generic Dictionary<,> or IDictionary<,>.");
 
             Type[] genericArguments = type.GetGenericArguments();
             if (genericArguments[0] != typeof(string))

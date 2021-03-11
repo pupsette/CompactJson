@@ -135,7 +135,7 @@ namespace CompactJson
         public static void Write(object model, TextWriter writer, bool indentation)
         {
             var consumer = new TextWriterJsonConsumer(writer, indentation);
-            ConverterRegistry.Get(typeof(object)).Write(model, consumer);
+            Write(model, consumer);
         }
 
         /// <summary>
@@ -146,7 +146,10 @@ namespace CompactJson
         /// the given object.</param>
         public static void Write(object model, IJsonConsumer consumer)
         {
-            ConverterRegistry.Get(typeof(object)).Write(model, consumer);
+            if (model == null)
+                consumer.Null();
+            else
+                ConverterRegistry.Get(model.GetType()).Write(model, consumer);
         }
 
         /// <summary>
