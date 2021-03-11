@@ -110,19 +110,20 @@ class MyClass
 
 There are converters already registered for the following types:
 * `string`
-* `int` / `int?`
-* `long` / `long?`
-* `float` / `float?`
-* `double` / `double?`
-* `bool` / `bool?`
-* `DateTime` / `DateTime?` (see DateTime Formatting below)
-* `Guid` / `Guid?`
+* `int`
+* `long`
+* `float`
+* `double`
+* `bool`
+* `DateTime` (see DateTime Formatting below)
+* `Guid`
 * `byte[]` (base64 encoded)
 * `JsonValue` / `JsonObject` / `JsonArray` / `JsonNumber` / `JsonBoolean` / `JsonString` (see 'JSON Object Model' below.
-* `List<T>`
+* `List<T>` / `IList<T>`
 * `T[]`
-* `Dictionary<string, T>` (maps to a JSON object, where the dictionary keys are JSON properties)
-* `Enum` / `Enum?` (enumeration values are encoded as string)
+* `Dictionary<string, T>` / `IDictionary<string, T>` (maps to a JSON object, where the dictionary keys are JSON properties)
+* `Enum` (enumeration values are encoded as string)
+* `Nullable<T>` (e.g. if there is a converter for `int`, `int?` will also be supported.)
 
 ## Classes and Structs
 
