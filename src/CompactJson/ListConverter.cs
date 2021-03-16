@@ -6,7 +6,7 @@ namespace CompactJson
 {
     internal sealed class ListConverter<T> : CollectionConverterBase
     {
-        public ListConverter(IConverter elementConverter) : base(typeof(List<T>), elementConverter)
+        public ListConverter(IConverter elementConverter) : base(typeof(List<T>), () => elementConverter)
         {
         }
 
@@ -62,6 +62,11 @@ namespace CompactJson
             }
 
             public void Number(long value)
+            {
+                mList.Add((T)mElementConverter.FromNumber(value));
+            }
+
+            public void Number(ulong value)
             {
                 mList.Add((T)mElementConverter.FromNumber(value));
             }

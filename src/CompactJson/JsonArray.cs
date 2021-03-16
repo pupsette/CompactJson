@@ -94,12 +94,17 @@ namespace CompactJson
 
         void IJsonConsumer.Number(double value)
         {
-            mList.Add(new JsonFloat(value));
+            mList.Add(new JsonNumber(value));
         }
 
         void IJsonConsumer.Number(long value)
         {
-            mList.Add(new JsonLong(value));
+            mList.Add(new JsonNumber(value));
+        }
+
+        void IJsonConsumer.Number(ulong value)
+        {
+            mList.Add(new JsonNumber(value));
         }
 
         void IJsonConsumer.String(string value)

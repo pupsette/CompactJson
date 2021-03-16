@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace CompactJson
 {
@@ -49,7 +50,7 @@ namespace CompactJson
             : base(type)
         {
             mBaseClassConverter = new ObjectConverter(type);
-            mBaseClassConverter.Reflect();
+            ((IConverterInitialization)mBaseClassConverter).InitializeConverter();
             mTypeNameResolver = typeNameResolver ?? throw new ArgumentNullException(nameof(typeNameResolver));
             mTypeProperty = typeProperty ?? throw new ArgumentNullException(nameof(typeProperty));
         }
@@ -91,7 +92,7 @@ namespace CompactJson
             }
 
             Type type = value.GetType();
-            if (!mTypeNameResolver.TryGetTypeName(type, out string typeName))
+            if (!mTypeNameResolver.TryGetTypeName(type, out string typeName) && type != mTypeNameResolver.DefaultType)
                 throw new Exception($"Type '{type}' is unknown.");
 
             IConverter converter = GetConverterForType(type);
@@ -103,7 +104,13 @@ namespace CompactJson
             if (type == this.Type)
                 return mBaseClassConverter;
             else
-                return ConverterRegistry.Get(type);
+            {
+                var converter = ConverterRegistry.Get(type);
+                if (!(converter is TypedConverter typedConverter))
+                    throw new Exception($"Expected converter registry to return an instance of {nameof(TypedConverter)} for type '{type}'.");
+
+                return typedConverter.mBaseClassConverter;
+            }
         }
 
         private static ITypeNameResolver CreateTypeNameResolverFromAttributes(Type type)
@@ -112,15 +119,38 @@ namespace CompactJson
             if (attributes == null)
                 throw new Exception($"Type {type} is not supported by {nameof(TypedConverter)} due to missing {nameof(TypeNameAttribute)}s.");
 
+            Type baseType = FindBaseClass(type);
+
             TypeNameResolver resolver = new TypeNameResolver();
             foreach (var attribute in attributes)
             {
-                if (!type.IsAssignableFrom(attribute.Type))
+                if (!baseType.IsAssignableFrom(attribute.Type))
                     throw new Exception($"Type '{attribute.Type}' cannot be assigned a name using the {nameof(TypeNameAttribute)} because it does not inherit from '{type}'.");
 
-                resolver.AddType(attribute.TypeName, attribute.Type);
+                if (attribute.TypeName == null)
+                {
+                    if (resolver.DefaultType != null)
+                        throw new Exception($"Type '{attribute.Type}' and '{resolver.DefaultType}' cannot both be the default type when serializaing '{baseType}'.");
+
+                    resolver.DefaultType = attribute.Type;
+                }
+                else
+                    resolver.AddType(attribute.TypeName, attribute.Type);
             }
             return resolver;
+        }
+
+        private static Type FindBaseClass(Type type)
+        {
+            while (type != null && type != typeof(object))
+            {
+                CustomConverterAttribute attr = (CustomConverterAttribute)Attribute.GetCustomAttribute(type, typeof(CustomConverterAttribute), false);
+                if (attr != null && attr.ConverterType == typeof(TypedConverterFactory))
+                    return type;
+
+                type = type.BaseType;
+            }
+            throw new Exception($"{nameof(TypedConverterFactory)} was not found somewhere in the inheritence chain of {type.Name}.");
         }
 
         private class ReadingConsumer : IJsonObjectConsumer
@@ -139,31 +169,43 @@ namespace CompactJson
 
             public IJsonArrayConsumer Array()
             {
+                ThrowIfNoConsumer();
                 return mWrappedConsumer.Array();
             }
 
             public void Boolean(bool value)
             {
+                ThrowIfNoConsumer();
                 mWrappedConsumer.Boolean(value);
             }
 
             public void Null()
             {
+                ThrowIfNoConsumer();
                 mWrappedConsumer.Null();
             }
 
             public void Number(double value)
             {
+                ThrowIfNoConsumer();
                 mWrappedConsumer.Number(value);
             }
 
             public void Number(long value)
             {
+                ThrowIfNoConsumer();
+                mWrappedConsumer.Number(value);
+            }
+
+            public void Number(ulong value)
+            {
+                ThrowIfNoConsumer();
                 mWrappedConsumer.Number(value);
             }
 
             public IJsonObjectConsumer Object()
             {
+                ThrowIfNoConsumer();
                 return mWrappedConsumer.Object();
             }
 
@@ -176,19 +218,30 @@ namespace CompactJson
 
                     mWrappedConsumer = mParent.GetConverterForType(type).FromObject(mWhenDone);
                 }
-                else
-                    mWrappedConsumer.String(value);
+                mWrappedConsumer.String(value);
             }
 
             public void PropertyName(string propertyName)
             {
-                if (mWrappedConsumer == null)
+                if (propertyName.Equals(mParent.mTypeProperty, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (propertyName != mParent.mTypeProperty)
-                        throw new Exception($"The property '{mParent.mTypeProperty}' was expected to be the first property in the JSON object when deserializing type '{mBaseType}', but found property '{propertyName}'.");
+                    if (mWrappedConsumer != null)
+                        throw new Exception($"The property '{mParent.mTypeProperty}' must only appear once in the JSON object when deserializing type '{mBaseType}'.");
+
+                    return;
                 }
                 else
-                    mWrappedConsumer.PropertyName(propertyName);
+                {
+                    if (mWrappedConsumer == null)
+                    {
+                        if (mParent.mTypeNameResolver.DefaultType == null)
+                            throw new Exception($"The property '{mParent.mTypeProperty}' must be the first property in the JSON object when deserializing type '{mBaseType}'.");
+                        
+                        mWrappedConsumer = mParent.GetConverterForType(mParent.mTypeNameResolver.DefaultType).FromObject(mWhenDone);
+                    }
+                }
+
+                mWrappedConsumer.PropertyName(propertyName);
             }
 
             public void Done()
@@ -197,6 +250,12 @@ namespace CompactJson
                     throw new Exception($"The property '{mParent.mTypeProperty}' must be present in the JSON object when deserializing type '{mBaseType}'.");
 
                 mWrappedConsumer.Done();
+            }
+
+            private void ThrowIfNoConsumer()
+            {
+                if (mWrappedConsumer == null)
+                    throw new Exception($"The property '{mParent.mTypeProperty}' must be a string when deserializing type '{mBaseType}'.");
             }
         }
 
@@ -241,11 +300,19 @@ namespace CompactJson
                 Refuse();
             }
 
+            public void Number(ulong value)
+            {
+                Refuse();
+            }
+
             public IJsonObjectConsumer Object()
             {
                 IJsonObjectConsumer obj = mWrappedConsumer.Object();
-                obj.PropertyName(mTypeProperty);
-                obj.String(mTypeName);
+                if (mTypeName != null)
+                {
+                    obj.PropertyName(mTypeProperty);
+                    obj.String(mTypeName);
+                }
                 return obj;
             }
 

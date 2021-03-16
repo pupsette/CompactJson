@@ -1,17 +1,68 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace CompactJson
 {
     internal static class ConverterFactoryHelper
     {
+        // this dictionary prevents infinite recursion if properties have the same type as one
+        //  of the declaring types in the object hierarchy.
+        private static readonly Dictionary<Type, IConverter> CURRENTLY_INITIALIZED_TYPES = new Dictionary<Type, IConverter>();
+
+        /// <summary>
+        /// Creates a converter for the given type and the optionally given converter type.
+        /// </summary>
+        /// <param name="converterType">An optional converter type. This type can either be implementing
+        /// <see cref="IConverter"/> or <see cref="IConverterFactory"/> or just be left null.</param>
+        /// <param name="type">The type for which to create a converter.</param>
+        /// <param name="converterParameters">Optional constructor parameters for converter to create.</param>
+        /// <returns>The new converter.</returns>
         public static IConverter CreateConverter(Type converterType, Type type, object[] converterParameters)
         {
+            // Get the factory. This may return null, if the given converter type is null.
             IConverterFactory factory = FromType(converterType);
-            return CreateConverter(factory, type, converterParameters);
+
+            return GetConverter(factory, type, converterParameters);
         }
 
-        private static IConverter CreateConverter(IConverterFactory factory, Type type, object[] converterParameters)
+        /// <summary>
+        /// Creates and initializes a converter. This takes care of nested types (recursive converter creation).
+        /// </summary>
+        /// <param name="factory">The converter factory to use. This must not be null.</param>
+        /// <param name="type">The type for which to create the converter.</param>
+        /// <param name="converterParameters">The constructor parameters for the new converter. This may be null.</param>
+        /// <returns>The new converter.</returns>
+        public static IConverter CreateConverter(IConverterFactory factory, Type type, object[] converterParameters)
+        {
+            if (factory == null)
+                throw new ArgumentNullException(nameof(factory));
+
+            IConverter converter;
+            lock (CURRENTLY_INITIALIZED_TYPES)
+            {
+                if (CURRENTLY_INITIALIZED_TYPES.TryGetValue(type, out converter))
+                    return converter;
+
+                converter = factory.Create(type, converterParameters);
+                if (!(converter is IConverterInitialization))
+                    return converter;
+
+                CURRENTLY_INITIALIZED_TYPES[type] = converter;
+            }
+            try
+            {
+                ((IConverterInitialization)converter).InitializeConverter();
+            }
+            finally
+            {
+                lock (CURRENTLY_INITIALIZED_TYPES)
+                    CURRENTLY_INITIALIZED_TYPES.Remove(type);
+            }
+            return converter;
+        }
+
+        private static IConverter GetConverter(IConverterFactory factory, Type type, object[] converterParameters)
         {
             if (factory != null)
             {

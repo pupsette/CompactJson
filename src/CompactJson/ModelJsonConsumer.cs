@@ -31,6 +31,11 @@
             Result = mConverter.FromNumber(value);
         }
 
+        public void Number(ulong value)
+        {
+            Result = mConverter.FromNumber(value);
+        }
+
         public void String(string value)
         {
             Result = mConverter.FromString(value);

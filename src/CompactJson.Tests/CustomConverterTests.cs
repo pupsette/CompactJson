@@ -35,6 +35,11 @@ namespace CompactJson.Tests
                 throw new NotImplementedException();
             }
 
+            public object FromNumber(ulong value)
+            {
+                throw new NotImplementedException();
+            }
+
             public IJsonObjectConsumer FromObject(Action<object> whenDone)
             {
                 throw new NotImplementedException();

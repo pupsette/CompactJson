@@ -272,6 +272,8 @@ namespace CompactJson
                     consumer.Boolean(tokenizer.CurrentToken.BooleanValue);
                 else if (tokenizer.CurrentToken.Type == Tokenizer.Token.NumberInteger)
                     consumer.Number(tokenizer.CurrentToken.IntegerValue);
+                else if (tokenizer.CurrentToken.Type == Tokenizer.Token.NumberUnsignedInteger)
+                    consumer.Number(tokenizer.CurrentToken.UnsignedIntegerValue);
                 else if (tokenizer.CurrentToken.Type == Tokenizer.Token.NumberFloat)
                     consumer.Number(tokenizer.CurrentToken.FloatValue);
                 else if (tokenizer.CurrentToken.Type == Tokenizer.Token.Null)
@@ -311,6 +313,7 @@ namespace CompactJson
                 String,
                 NumberFloat,
                 NumberInteger,
+                NumberUnsignedInteger,
                 Boolean,
                 Null
             }
@@ -322,6 +325,7 @@ namespace CompactJson
                 public bool BooleanValue;
                 public double FloatValue;
                 public long IntegerValue;
+                public ulong UnsignedIntegerValue;
                 public int LineNo;
                 public int Position;
 
@@ -333,6 +337,8 @@ namespace CompactJson
                             return FloatValue.ToString(CultureInfo.InvariantCulture);
                         case Token.NumberInteger:
                             return IntegerValue.ToString(CultureInfo.InvariantCulture);
+                        case Token.NumberUnsignedInteger:
+                            return UnsignedIntegerValue.ToString(CultureInfo.InvariantCulture);
                         case Token.String:
                             return "\"" + JsonString.Escape(StringValue) + "\"";
                         case Token.Boolean:
@@ -628,6 +634,7 @@ namespace CompactJson
                 mStringBuilder.Append(c);
                 bool dotAppeared = false;
                 bool exponentAppeared = false;
+                bool minusAppeared = c == '-';
                 for (; ; )
                 {
                     c = PeekChar();
@@ -659,11 +666,17 @@ namespace CompactJson
                         throw new ParserException($"Invalid number '{mStringBuilder}' in line {lineNo} at position {columnIndex}.", lineNo, columnIndex);
                     tokenData.Type = Token.NumberFloat;
                 }
-                else
+                else if (minusAppeared)
                 {
                     if (!long.TryParse(mStringBuilder.ToString(), System.Globalization.NumberStyles.Integer, CultureInfo.InvariantCulture, out tokenData.IntegerValue))
                         throw new ParserException($"Invalid number '{mStringBuilder}' in line {lineNo} at position {columnIndex}.", lineNo, columnIndex);
                     tokenData.Type = Token.NumberInteger;
+                }
+                else
+                {
+                    if (!ulong.TryParse(mStringBuilder.ToString(), System.Globalization.NumberStyles.Integer, CultureInfo.InvariantCulture, out tokenData.UnsignedIntegerValue))
+                        throw new ParserException($"Invalid number '{mStringBuilder}' in line {lineNo} at position {columnIndex}.", lineNo, columnIndex);
+                    tokenData.Type = Token.NumberUnsignedInteger;
                 }
             }
         }

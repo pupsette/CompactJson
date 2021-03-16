@@ -10,7 +10,7 @@ namespace CompactJson
     {
         public bool CanConvert(Type type)
         {
-            return Attribute.IsDefined(type, typeof(CustomConverterAttribute), false);
+            return Attribute.IsDefined(type, typeof(CustomConverterAttribute), true);
         }
 
         public IConverter Create(Type type, object[] converterParameters)

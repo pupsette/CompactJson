@@ -33,7 +33,12 @@
 
         public void Number(long value)
         {
-            cumulatedHashCode = cumulatedHashCode * 5 + ((double)value).GetHashCode();
+            cumulatedHashCode = cumulatedHashCode * 5 + value.GetHashCode();
+        }
+
+        public void Number(ulong value)
+        {
+            cumulatedHashCode = cumulatedHashCode * 5 + value.GetHashCode();
         }
 
         public IJsonObjectConsumer Object()

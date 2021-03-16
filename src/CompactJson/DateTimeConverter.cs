@@ -170,8 +170,17 @@ namespace CompactJson
             int milliseconds = 0;
             if (HasChar(value, index, '.'))
             {
-                milliseconds = ParseChars(value, index + 1, 3, 100);
-                index += 4;
+                index++;
+                double fraction = 0;
+                double dim = 10.0;
+                while (index < value.Length && char.IsDigit(value[index]))
+                {
+                    int c = (int)value[index] - (int)'0';
+                    fraction += c / dim;
+                    dim *= 10;
+                    index++;
+                }
+                milliseconds = Math.Min(999, (int)(1000 * fraction + 0.5));
             }
 
             if (index < value.Length)

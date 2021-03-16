@@ -15,27 +15,39 @@ namespace CompactJson
 #else
     internal
 #endif
-    abstract class CollectionConverterBase : ConverterBase
+    abstract class CollectionConverterBase : ConverterBase, IConverterInitialization
     {
+        private readonly Func<IConverter> elementConverterFactory;
+
         /// <summary>
         /// The converter to be used for the elements of the collection. This cannot be null.
         /// </summary>
-        public IConverter ElementConverter { get; }
+        public IConverter ElementConverter { get; private set; }
 
         /// <summary>
         /// Protected constructor for deriving classes, which takes the .NET type
         /// that is to be converted from and to JSON.
         /// </summary>
         /// <param name="type">The .NET type that is to be converted from and to JSON.</param>
-        /// <param name="elementConverter">The converter which is used for converting
-        /// the individual items of the collection.</param>
-        protected CollectionConverterBase(Type type, IConverter elementConverter)
+        /// <param name="elementConverterFactory">The delegate for delayed creation of the element
+        /// converter.</param>
+        protected CollectionConverterBase(Type type, Func<IConverter> elementConverterFactory)
             : base(type)
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
 
-            ElementConverter = elementConverter ?? throw new ArgumentNullException(nameof(elementConverter));
+            this.elementConverterFactory = elementConverterFactory ?? throw new ArgumentNullException(nameof(elementConverterFactory));
+        }
+
+        /// <summary>
+        /// Initializes the converter. This method will be called by converter
+        /// factories after creation and before usage.
+        /// </summary>
+        void IConverterInitialization.InitializeConverter()
+        {
+            if (ElementConverter == null)
+                ElementConverter = elementConverterFactory();
         }
 
         /// <summary>

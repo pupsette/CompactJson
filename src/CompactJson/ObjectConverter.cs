@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.Serialization;
 
 namespace CompactJson
 {
-    internal sealed class ObjectConverter : ConverterBase
+    internal sealed class ObjectConverter : ConverterBase, IConverterInitialization
     {
         internal struct PropInfo
         {
@@ -22,14 +23,8 @@ namespace CompactJson
         private PropInfo[] mPropList;
         private Func<object> mConstructor;
 
-        private static readonly Dictionary<Type, ObjectConverter> CURRENTLY_REFLECTED_TYPES = new Dictionary<Type, ObjectConverter>();
-
         private void AddProperty(MemberInfo memberInfo, Func<object, object> getter, Action<object, object> setter, Type propertyType)
         {
-            // check, if the member should be ignored
-            if (Attribute.IsDefined(memberInfo, typeof(JsonIgnoreMemberAttribute)))
-                return;
-
             // check, if a custom converter has been assigned
             Type converterType = CustomConverterAttribute.GetConverterType(memberInfo, out object[] converterParameters);
             IConverter converter = ConverterFactoryHelper.CreateConverter(converterType, propertyType, converterParameters);
@@ -56,7 +51,7 @@ namespace CompactJson
             return defaultValue;
         }
 
-        internal void Reflect()
+        void IConverterInitialization.InitializeConverter()
         {
             mProps.Clear();
 
@@ -73,26 +68,32 @@ namespace CompactJson
             }
 
             mPropList = mProps.Values.ToArray();
-            Array.Sort(mPropList, (p1, p2) => p1.Name.CompareTo(p2.Name));
 
             mConstructor = GetConstructor(Type);
         }
 
-        private static bool FieldQualifies(FieldInfo field)
+        private static bool MemberQualifies(MemberInfo memberInfo, bool autoInclude)
         {
-            if (field.IsPublic && !field.IsInitOnly)
+            // check, if the member should be ignored
+            if (Attribute.IsDefined(memberInfo, typeof(JsonIgnoreMemberAttribute)))
+                return false;
+
+            if (memberInfo.IsDefined(typeof(JsonPropertyAttribute), true))
                 return true;
 
-            return field.IsDefined(typeof(JsonPropertyAttribute), true);
+            return autoInclude && !Attribute.IsDefined(memberInfo, typeof(IgnoreDataMemberAttribute));
+        }
+
+        private static bool FieldQualifies(FieldInfo field)
+        {
+            bool autoInclude = (field.IsPublic && !field.IsInitOnly);
+            return MemberQualifies(field, autoInclude);
         }
 
         private static bool PropertyQualifies(PropertyInfo property)
         {
-            if ((property.GetSetMethod()?.IsPublic ?? false) &&
-                (property.GetGetMethod()?.IsPublic ?? false))
-                return true;
-
-            return property.IsDefined(typeof(JsonPropertyAttribute), true);
+            bool autoInclude = (property.GetSetMethod(true) != null) && (property.GetGetMethod()?.IsPublic ?? false);
+            return MemberQualifies(property, autoInclude);
         }
 
         private static Func<object> GetConstructor(Type objtype)
@@ -279,7 +280,24 @@ namespace CompactJson
                 if (!mValidProperty)
                     return DummyConsumer.INSTANCE;
 
-                return mCurrentPropInfo.Converter.FromArray(value => mCurrentPropInfo.Setter(mObject, value));
+                try
+                {
+                    return mCurrentPropInfo.Converter.FromArray(value =>
+                    {
+                        try
+                        {
+                            mCurrentPropInfo.Setter(mObject, value);
+                        }
+                        catch (Exception exS)
+                        {
+                            throw CreateSetterError(exS);
+                        }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    throw CreateSetterError(ex);
+                }
             }
 
             public void Boolean(bool value)
@@ -287,7 +305,14 @@ namespace CompactJson
                 if (!mValidProperty)
                     return;
 
-                mCurrentPropInfo.Setter(mObject, mCurrentPropInfo.Converter.FromBoolean(value));
+                try
+                {
+                    mCurrentPropInfo.Setter(mObject, mCurrentPropInfo.Converter.FromBoolean(value));
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"Reading property '{mCurrentPropInfo.Name}' of type '{mObject.GetType().Name}' failed: {ex.Message}", ex);
+                }
             }
 
             public void Done()
@@ -300,7 +325,14 @@ namespace CompactJson
                 if (!mValidProperty)
                     return;
 
-                mCurrentPropInfo.Setter(mObject, mCurrentPropInfo.Converter.FromNull());
+                try
+                {
+                    mCurrentPropInfo.Setter(mObject, mCurrentPropInfo.Converter.FromNull());
+                }
+                catch (Exception ex)
+                {
+                    throw CreateSetterError(ex);
+                }
             }
 
             public void Number(double value)
@@ -308,7 +340,14 @@ namespace CompactJson
                 if (!mValidProperty)
                     return;
 
-                mCurrentPropInfo.Setter(mObject, mCurrentPropInfo.Converter.FromNumber(value));
+                try
+                {
+                    mCurrentPropInfo.Setter(mObject, mCurrentPropInfo.Converter.FromNumber(value));
+                }
+                catch (Exception ex)
+                {
+                    throw CreateSetterError(ex);
+                }
             }
 
             public void Number(long value)
@@ -316,7 +355,29 @@ namespace CompactJson
                 if (!mValidProperty)
                     return;
 
-                mCurrentPropInfo.Setter(mObject, mCurrentPropInfo.Converter.FromNumber(value));
+                try
+                {
+                    mCurrentPropInfo.Setter(mObject, mCurrentPropInfo.Converter.FromNumber(value));
+                }
+                catch (Exception ex)
+                {
+                    throw CreateSetterError(ex);
+                }
+            }
+
+            public void Number(ulong value)
+            {
+                if (!mValidProperty)
+                    return;
+
+                try
+                {
+                    mCurrentPropInfo.Setter(mObject, mCurrentPropInfo.Converter.FromNumber(value));
+                }
+                catch (Exception ex)
+                {
+                    throw CreateSetterError(ex);
+                }
             }
 
             public IJsonObjectConsumer Object()
@@ -324,7 +385,29 @@ namespace CompactJson
                 if (!mValidProperty)
                     return DummyConsumer.INSTANCE;
 
-                return mCurrentPropInfo.Converter.FromObject(value => mCurrentPropInfo.Setter(mObject, value));
+                try
+                {
+                    return mCurrentPropInfo.Converter.FromObject(value =>
+                    {
+                        try
+                        {
+                            mCurrentPropInfo.Setter(mObject, value);
+                        }
+                        catch (Exception ex)
+                        {
+                            throw CreateSetterError(ex);
+                        }
+                    });
+                }
+                catch (Exception ex)
+                {
+                    throw CreateSetterError(ex);
+                }
+            }
+
+            private Exception CreateSetterError(Exception ex)
+            {
+                return new Exception($"Reading property '{mCurrentPropInfo.Name}' of type '{mObject.GetType().Name}' failed: {ex.Message}", ex);
             }
 
             private sealed class DummyConsumer : IJsonObjectConsumer, IJsonArrayConsumer
@@ -353,6 +436,10 @@ namespace CompactJson
                 }
 
                 public void Number(long value)
+                {
+                }
+
+                public void Number(ulong value)
                 {
                 }
 
@@ -399,7 +486,14 @@ namespace CompactJson
                 if (!mValidProperty)
                     return;
 
-                mCurrentPropInfo.Setter(mObject, mCurrentPropInfo.Converter.FromString(value));
+                try
+                {
+                    mCurrentPropInfo.Setter(mObject, mCurrentPropInfo.Converter.FromString(value));
+                }
+                catch (Exception ex)
+                {
+                    throw CreateSetterError(ex);
+                }
             }
         }
 

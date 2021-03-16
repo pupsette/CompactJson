@@ -36,6 +36,41 @@ namespace CompactJson
                 return null;
             }
 
+            public override IJsonArrayConsumer FromArray(Action<object> whenDone)
+            {
+                return valueTypeConverter.FromArray(whenDone);
+            }
+
+            public override object FromBoolean(bool value)
+            {
+                return valueTypeConverter.FromBoolean(value);
+            }
+
+            public override object FromNumber(double value)
+            {
+                return valueTypeConverter.FromNumber(value);
+            }
+
+            public override object FromNumber(long value)
+            {
+                return valueTypeConverter.FromNumber(value);
+            }
+
+            public override object FromNumber(ulong value)
+            {
+                return valueTypeConverter.FromNumber(value);
+            }
+
+            public override IJsonObjectConsumer FromObject(Action<object> whenDone)
+            {
+                return valueTypeConverter.FromObject(whenDone);
+            }
+
+            public override object FromString(string value)
+            {
+                return valueTypeConverter.FromString(value);
+            }
+
             public override void Write(object value, IJsonConsumer writer)
             {
                 if (value == null)

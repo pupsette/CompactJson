@@ -4,7 +4,7 @@ namespace CompactJson
 {
     internal sealed class ArrayConverter<T> : CollectionConverterBase
     {
-        public ArrayConverter(IConverter elementConverter) : base(typeof(T[]), elementConverter)
+        public ArrayConverter(IConverter elementConverter) : base(typeof(T[]), () => elementConverter)
         {
         }
 

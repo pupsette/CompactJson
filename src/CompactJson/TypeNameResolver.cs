@@ -81,6 +81,14 @@ namespace CompactJson
             }
         }
 
+        /// <summary>
+        /// An optional default type, which can be deserialized in case the type
+        /// property is missing. The type name will also not be serialized for this
+        /// default type.
+        /// </summary>
+        public Type DefaultType { get; set; }
+
+
         private struct Entry
         {
             public Type Type;

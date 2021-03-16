@@ -25,7 +25,11 @@ namespace CompactJson
         /// Instantiates a <see cref="TypeNameAttribute"/>.
         /// </summary>
         /// <param name="type">The known type for which to assign a type name.</param>
-        /// <param name="typeName">The type name to assign.</param>
+        /// <param name="typeName">The type name to assign. This can be left null for 
+        /// a single type of the <see cref="TypedConverterFactory" /> to mark it as
+        /// default type. This default type will be deserialized, if the type property 
+        /// is missing in the source JSON. The type name will also not be 
+        /// serialized for the default type.</param>
         public TypeNameAttribute(Type type, string typeName)
         {
             Type = type;
@@ -42,9 +46,15 @@ namespace CompactJson
         /// </summary>
         public Type Type { get; }
 
+        /// <summary>
+        /// A boolean flag, indicating, whether this instance will be deserialized, if the type property
+        /// is missing. The type name will also not be serialized for the default type.
+        /// </summary>
+        public bool IsDefaultType { get => TypeName == null; }
+
         internal static TypeNameAttribute[] GetKnownTypes(Type type)
         {
-            IEnumerable<TypeNameAttribute> atts = type.GetCustomAttributes<TypeNameAttribute>(false);
+            IEnumerable<TypeNameAttribute> atts = type.GetCustomAttributes<TypeNameAttribute>(true);
             if (atts == null)
                 return null;
 
@@ -56,8 +66,6 @@ namespace CompactJson
             {
                 if (att.Type == null)
                     throw new Exception($"{nameof(Type)} must not be null in {nameof(TypeNameAttribute)} for type {type.Name}.");
-                if (string.IsNullOrEmpty(att.TypeName))
-                    throw new Exception($"{nameof(TypeName)} must not be null or empty in {nameof(TypeNameAttribute)} for type {type.Name}.");
             }
             return result;
         }

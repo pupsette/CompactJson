@@ -8,7 +8,7 @@ namespace CompactJson.Tests
         [TestCase("{ \"prop1\" : 500, \"prop2\": 399}", "{ \"prop1\" : 500, \"prop2\": 399}")]
         [TestCase("true", "true")]
         [TestCase("null", "null ")]
-        [TestCase(" [1,6,2] ", "[1,6.0,2]")]
+        [TestCase(" [1,6.0,2] ", "[1,6.0,2]")]
         [TestCase(" [\"hi\", 6.0, 2] ", "[\"hi\",6.0,2]")]
         public void Parse_to_generic_model_and_compare_for_equality(string input1, string input2)
         {

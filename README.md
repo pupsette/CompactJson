@@ -110,10 +110,11 @@ class MyClass
 
 There are converters already registered for the following types:
 * `string`
-* `int`
-* `long`
+* `int` / `uint`
+* `long` / `ulong`
 * `float`
-* `double`
+* `double` ("NaN", "Infinity" and "-Infinity" are encoded as strings)
+* `char`
 * `bool`
 * `DateTime` (see DateTime Formatting below)
 * `Guid`
@@ -130,14 +131,14 @@ There are converters already registered for the following types:
 ### Properties and Fields
 For converting from JSON to custom .NET classes and back there are a few rules, that are applied to the fields and properties of the custom class. The following members will be included during serialization/deserialization:
 1. All public fields
-2. All public properties (with public getter and setter)
+2. All public properties (with getter and setter, getter must be public)
 3. Properties and fields with the `[JsonProperty]` attribute
 
 The property or field name is kept as-is. If you want to use a different name when converting to JSON, you have to assign it using the `[JsonProperty("myCustomName")]` attribute.
 
 :heavy_exclamation_mark: Trying to parse into a `readonly` field will throw an exception during deserialization. Also parsing into a property without setter will fail.
 
-Properties and fields may also be excluded from serialization/deserialization by using the `[JsonIgnoreMember]` attribute.
+Properties and fields may also be excluded from serialization/deserialization by using the `[JsonIgnoreMember]` or `[IgnoreDataMember]` attribute.
 
 Example:
 ```csharp
@@ -250,6 +251,8 @@ The name of the JSON property, which is used to encode the type name can be chos
 This example excludes the base type from serialization, because we did not assign a type name. Also there is no reflection involved, trying to determine all sub classes! Only the type name assignments at your base class makes the type visible to the serializer.
 
 If your application determines supported types at run-time you can create a custom converter factory, which creates a `TypedConverter` by passing your own implementation of `ITypeNameResolver`.
+
+One of the `[TypeName]` attributes may set the name parameter to `null` (e.g. `[TypeName(typeof(LogConfiguration), null)]`). This type is then deserialized in case the type property is missing. Also when serializing this type, the type property will not be emitted.
 
 ## DateTime Formatting
 

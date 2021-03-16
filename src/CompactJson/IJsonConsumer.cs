@@ -52,6 +52,12 @@
         void Number(long value);
 
         /// <summary>
+        /// Consumes an unsigned 64 bit integer value.
+        /// </summary>
+        /// <param name="value">The unsigned 64 bit integer value.</param>
+        void Number(ulong value);
+
+        /// <summary>
         /// Consumes a string value. The string is unescaped and
         /// does not include double-quotes.
         /// </summary>

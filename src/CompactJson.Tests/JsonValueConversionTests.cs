@@ -22,7 +22,7 @@ namespace CompactJson.Tests
         [TestCase("null", typeof(int?), "null")]
         [TestCase("158", typeof(int?), "158")]
         [TestCase("null", typeof(double?), "null")]
-        [TestCase("158", typeof(double?), "158")]
+        [TestCase("158", typeof(double?), "158.0", "158")]
         [TestCase("null", typeof(DateTime?), "null")]
         [TestCase("\"2001-05-13T00:12:22\"", typeof(DateTime?), "\"2001-05-13T00:12:22\"")]
 
@@ -38,13 +38,13 @@ namespace CompactJson.Tests
         // arrays
         [TestCase("null", typeof(int[]), "null")]
         [TestCase(" [1,6,2] ", typeof(int[]), "[1,6,2]")]
-        [TestCase(" [1, 6.0,2] ", typeof(double[]), "[1,6,2]")]
-        [TestCase(" [1, 6.0,2] ", typeof(List<double>), "[1,6,2]")]
-        [TestCase(" [\"hi\", 6.0, 2] ", typeof(List<object>), "[\"hi\",6,2]")]
-        public void Conversion_to_model_and_back(string input, Type type, string expectedOutput)
+        [TestCase(" [1, 6.0,2] ", typeof(double[]), "[1.0,6.0,2.0]", "[1,6.0,2]")]
+        [TestCase(" [1, 6.0,2] ", typeof(List<double>), "[1.0,6.0,2.0]", "[1,6.0,2]")]
+        [TestCase(" [\"hi\", 6.0, 2] ", typeof(List<object>), "[\"hi\",6.0,2]")]
+        public void Conversion_to_model_and_back(string input, Type type, string expectedOutput, string expectedJsonValueOutput = null)
         {
             JsonValue jsonValue = Serializer.Parse(input);
-            Assert.That(jsonValue.ToString(false), Is.EqualTo(expectedOutput));
+            Assert.That(jsonValue.ToString(false), Is.EqualTo(expectedJsonValueOutput ?? expectedOutput));
 
             object model = jsonValue.ToModel(type);
             string output = Serializer.ToString(model, false);

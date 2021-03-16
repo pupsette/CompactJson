@@ -31,5 +31,12 @@ namespace CompactJson
         /// <param name="type">The resulting type, or null.</param>
         /// <returns>true, if the type name is known; false, otherwise.</returns>
         bool TryGetType(string typeName, out Type type);
+
+        /// <summary>
+        /// An optional default type, which can be deserialized in case the type
+        /// property is missing. The type name will also not be serialized for this
+        /// default type.
+        /// </summary>
+        Type DefaultType { get; }
     }
 }

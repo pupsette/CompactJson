@@ -7,19 +7,19 @@ namespace CompactJson
         private readonly bool mAllowJsonNull;
         private readonly bool mAllowJsonArray;
         private readonly bool mAllowJsonFloat;
-        private readonly bool mAllowJsonLong;
+        private readonly bool mAllowJsonInteger;
         private readonly bool mAllowJsonString;
         private readonly bool mAllowJsonBoolean;
         private readonly bool mAllowJsonObject;
         private readonly bool mAcceptNull;
 
-        public JsonValueConverter(Type type, bool allowJsonNull = false, bool allowJsonArray = false, bool allowJsonFloat = false, bool allowJsonLong = false, bool allowJsonString = false, bool allowJsonBoolean = false, bool allowJsonObject = false, bool acceptNull = false)
+        public JsonValueConverter(Type type, bool allowJsonNull = false, bool allowJsonArray = false, bool allowJsonFloat = false, bool allowJsonInteger = false, bool allowJsonString = false, bool allowJsonBoolean = false, bool allowJsonObject = false, bool acceptNull = false)
             : base(type)
         {
             mAllowJsonNull = allowJsonNull;
             mAllowJsonArray = allowJsonArray;
             mAllowJsonFloat = allowJsonFloat;
-            mAllowJsonLong = allowJsonLong;
+            mAllowJsonInteger = allowJsonInteger;
             mAllowJsonString = allowJsonString;
             mAllowJsonBoolean = allowJsonBoolean;
             mAllowJsonObject = allowJsonObject;
@@ -58,15 +58,23 @@ namespace CompactJson
             if (!mAllowJsonFloat)
                 return base.FromNumber(value);
 
-            return new JsonFloat(value);
+            return new JsonNumber(value);
         }
 
         public override object FromNumber(long value)
         {
-            if (!mAllowJsonLong)
+            if (!mAllowJsonInteger)
                 return base.FromNumber(value);
 
-            return new JsonLong(value);
+            return new JsonNumber(value);
+        }
+
+        public override object FromNumber(ulong value)
+        {
+            if (!mAllowJsonInteger)
+                return base.FromNumber(value);
+
+            return new JsonNumber(value);
         }
 
         public override object FromString(string value)

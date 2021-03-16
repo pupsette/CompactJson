@@ -27,10 +27,10 @@ namespace CompactJson
             Type elementType = genericArguments[1];
 
             Type elementConverterType = ConverterFactoryHelper.GetConverterParameter<Type>(typeof(DictionaryConverterFactory), parameters, 0, 0, 1);
-            IConverter elementConverter = ConverterFactoryHelper.CreateConverter(elementConverterType, elementType, null);
+            Func<IConverter> elementConverterFactory = () => ConverterFactoryHelper.CreateConverter(elementConverterType, elementType, null);
 
             Type dictConverterType = typeof(DictionaryConverter<>).MakeGenericType(elementType);
-            return (IConverter)Activator.CreateInstance(dictConverterType, elementConverter);
+            return (IConverter)Activator.CreateInstance(dictConverterType, elementConverterFactory);
         }
     }
 }

@@ -66,6 +66,14 @@ namespace CompactJson
         object FromNumber(long value);
 
         /// <summary>
+        /// Is invoked by a parser or another producer whenever an unsigned integer
+        /// value was parsed/produced.
+        /// </summary>
+        /// <param name="value">The unsigned integer value.</param>
+        /// <returns>The resulting .NET object.</returns>
+        object FromNumber(ulong value);
+
+        /// <summary>
         /// Is invoked by a parser or another producer whenever an object
         /// begins. This method must return an object consumer which
         /// is used to pass the property data of the object. Once, there are 

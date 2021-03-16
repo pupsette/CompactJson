@@ -80,6 +80,11 @@ namespace CompactJson.Tests
             mStringBuilder.Append("L" + value.ToString(CultureInfo.InvariantCulture));
         }
 
+        public void Number(ulong value)
+        {
+            mStringBuilder.Append("L" + value.ToString(CultureInfo.InvariantCulture));
+        }
+
         public IJsonObjectConsumer Object()
         {
             mStringBuilder.Append("{");

@@ -18,6 +18,11 @@ namespace CompactJson.Tests
             public int DefNumber { get; set; }
         }
 
+        private class TestClassNullableEnum
+        {
+            public StringComparison? CompareMode { get; set; }
+        }
+
         private class TestClassEmitNullableDefault : TestClass
         {
             [EmitDefaultValue]
@@ -26,7 +31,7 @@ namespace CompactJson.Tests
 
         private class TestClassNested : TestClass
         {
-            public TestClass Nested { get; set; }
+            public TestClassNested Nested { get; set; }
         }
 
         private class TestClassIgnoredMember
@@ -61,6 +66,9 @@ namespace CompactJson.Tests
         [TestCase("{\"NotAnything\":{}}", typeof(TestClassEmbeddedJsonObject), "{\"NotAnything\":{},\"TestValue\":33}")]
         [TestCase("{\"NotAnything\":null}", typeof(TestClassEmbeddedJsonObject), "{\"TestValue\":33}")]
         [TestCase("{}", typeof(TestClassEmbeddedJsonObject), "{\"TestValue\":33}")]
+        [TestCase("{}", typeof(TestClassNullableEnum), "{}")]
+        [TestCase("{\"CompareMode\":null}", typeof(TestClassNullableEnum), "{}")]
+        [TestCase("{\"CompareMode\":\"Ordinal\"}", typeof(TestClassNullableEnum), "{\"CompareMode\":\"Ordinal\"}")]
         public void Conversion_to_model_and_back(string input, Type type, string expectedOutput)
         {
             object model = Serializer.Parse(input, type);

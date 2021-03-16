@@ -9,12 +9,24 @@
 
         protected override void InternalWrite(int value, IJsonConsumer writer)
         {
-            writer.Number((long)value);
+            if (value >= 0)
+                writer.Number((ulong)value);
+            else
+                writer.Number((long)value);
         }
 
         public override object FromNumber(long value)
         {
-            return (int)value;
+            if (value < int.MinValue || value > int.MaxValue)
+                throw new System.Exception($"JSON number {value} cannot be converted to a 32 bit signed integer.");
+            return unchecked((int)value);
+        }
+
+        public override object FromNumber(ulong value)
+        {
+            if (value > int.MaxValue)
+                throw new System.Exception($"JSON number {value} cannot be converted to a 32 bit signed integer.");
+            return unchecked((int)value);
         }
     }
 }

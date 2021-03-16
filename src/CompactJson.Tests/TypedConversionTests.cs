@@ -7,6 +7,24 @@ namespace CompactJson.Tests
     [TestFixture]
     public class TypedConversionTests
     {
+        [TypeName(typeof(DerivedDefaultClass), null)]
+        [TypeName(typeof(DerivedC), "C")]
+        [CustomConverter(typeof(TypedConverterFactory), "TT")]
+        public abstract class AbstractBaseClassWithDefault
+        {
+            public string TheBase;
+        }
+
+        public class DerivedDefaultClass : AbstractBaseClassWithDefault
+        {
+            public bool Default;
+        }
+
+        public class DerivedC : AbstractBaseClassWithDefault
+        {
+            public string B;
+        }
+
         [TypeName(typeof(BaseClass), "BASE")]
         [TypeName(typeof(DerivedA), "A")]
         [TypeName(typeof(DerivedB), "B")]
@@ -57,6 +75,17 @@ namespace CompactJson.Tests
             Assert.That(container.Objects[1], Is.TypeOf<BaseClass>());
             Assert.That(container.Objects[2], Is.TypeOf<BaseClass>());
             Assert.That(container.Objects[3], Is.TypeOf<DerivedA>());
+        }
+
+        [Test]
+        public void Dont_serialize_and_deserialize_type_name_for_default()
+        {
+            string json = Serializer.ToString(new DerivedDefaultClass { TheBase = "Base", Default = true }, false);
+            Assert.That(json, Is.EqualTo("{\"Default\":true,\"TheBase\":\"Base\"}"));
+            AbstractBaseClassWithDefault result = Serializer.Parse<AbstractBaseClassWithDefault>(json);
+            Assert.That(result.TheBase, Is.EqualTo("Base"));
+            Assert.That(result, Is.InstanceOf<DerivedDefaultClass>());
+            Assert.That(((DerivedDefaultClass)result).Default, Is.True);
         }
     }
 }

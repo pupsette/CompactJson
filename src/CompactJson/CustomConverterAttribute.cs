@@ -47,7 +47,7 @@ namespace CompactJson
         internal static Type GetConverterType(Type type, out object[] converterParameters)
         {
             converterParameters = null;
-            CustomConverterAttribute att = type.GetCustomAttribute<CustomConverterAttribute>(false);
+            CustomConverterAttribute att = type.GetCustomAttribute<CustomConverterAttribute>(true);
             if (att == null)
                 return null;
             if (att.ConverterType == null)

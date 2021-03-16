@@ -5,7 +5,7 @@ namespace CompactJson
 {
     internal sealed class DictionaryConverter<T> : CollectionConverterBase
     {
-        public DictionaryConverter(IConverter elementConverter)
+        public DictionaryConverter(Func<IConverter> elementConverter)
             : base(typeof(Dictionary<string, T>), elementConverter)
         {
         }
@@ -77,6 +77,10 @@ namespace CompactJson
             }
 
             public void Number(long value)
+            {
+                mResult.Add(mKey, (T)mValueConverter.FromNumber(value));
+            }
+            public void Number(ulong value)
             {
                 mResult.Add(mKey, (T)mValueConverter.FromNumber(value));
             }

@@ -21,12 +21,20 @@
 
         public void Number(double value)
         {
-            Result = new JsonFloat(value);
+            Result = new JsonNumber(value);
         }
 
         public void Number(long value)
         {
-            Result = new JsonLong(value);
+            if (value >= 0)
+                Result = new JsonNumber((ulong)value);
+            else
+                Result = new JsonNumber(value);
+        }
+        
+        public void Number(ulong value)
+        {
+            Result = new JsonNumber(value);
         }
 
         public void String(string value)

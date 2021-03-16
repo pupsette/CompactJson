@@ -22,8 +22,14 @@ namespace CompactJson
             AddConverter(new ByteArrayConverter());
             AddConverter(new Int32Converter(false));
             AddConverter(new Int32Converter(true));
+            AddConverter(new UInt32Converter(false));
+            AddConverter(new UInt32Converter(true));
             AddConverter(new Int64Converter(false));
             AddConverter(new Int64Converter(true));
+            AddConverter(new UInt64Converter(false));
+            AddConverter(new UInt64Converter(true));
+            AddConverter(new CharConverter(false));
+            AddConverter(new CharConverter(true));
             AddConverter(new DoubleConverter(false));
             AddConverter(new DoubleConverter(true));
             AddConverter(new FloatConverter(false));
@@ -39,7 +45,7 @@ namespace CompactJson
             AddConverter(new JsonValueConverter(typeof(JsonValue), true, true, true, true, true, true, true, false));
             AddConverter(new JsonValueConverter(typeof(JsonObject), allowJsonObject: true, acceptNull: true));
             AddConverter(new JsonValueConverter(typeof(JsonArray), allowJsonArray: true, acceptNull: true));
-            AddConverter(new JsonValueConverter(typeof(JsonNumber), allowJsonFloat: true, allowJsonLong: true));
+            AddConverter(new JsonValueConverter(typeof(JsonNumber), allowJsonFloat: true, allowJsonInteger: true));
             AddConverter(new JsonValueConverter(typeof(JsonBoolean), allowJsonBoolean: true));
             AddConverter(new JsonValueConverter(typeof(JsonString), allowJsonString: true, acceptNull: true));
 
@@ -89,7 +95,6 @@ namespace CompactJson
 
         private static readonly Dictionary<Type, IConverter> CONVERTERS = new Dictionary<Type, IConverter>();
         private static readonly List<IConverterFactory> FACTORIES = new List<IConverterFactory>();
-        private static readonly Dictionary<Type, int> CURRENTLY_CREATING_CONVERTERS = new Dictionary<Type, int>();
 
         /// <summary>
         /// Returns the type-specific converter for the given type.
@@ -128,30 +133,13 @@ namespace CompactJson
 
         private static IConverter CreateConverter(Type type, object[] converterParameters)
         {
-            int factoryStartIndex;
-            // recursive calls will by default skip the previously used converter factory.
-            bool isRecursion = CURRENTLY_CREATING_CONVERTERS.TryGetValue(type, out factoryStartIndex);
-            if (!isRecursion)
-                factoryStartIndex = FACTORIES.Count - 1;
+            int factoryStartIndex = FACTORIES.Count - 1;
 
             // walk the factories from last to first
             for (int i = factoryStartIndex; i >= 0; i--)
             {
                 if (FACTORIES[i].CanConvert(type))
-                {
-                    CURRENTLY_CREATING_CONVERTERS[type] = i - 1;
-                    try
-                    {
-                        return FACTORIES[i].Create(type, converterParameters);
-                    }
-                    finally
-                    {
-                        if (isRecursion)
-                            CURRENTLY_CREATING_CONVERTERS[type] = factoryStartIndex; // reset to the previous index
-                        else
-                            CURRENTLY_CREATING_CONVERTERS.Remove(type); // clear any start index
-                    }
-                }
+                    return ConverterFactoryHelper.CreateConverter(FACTORIES[i], type, converterParameters);
             }
 
             throw new Exception($"Unsupported model type '{type}'.");

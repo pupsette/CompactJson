@@ -95,6 +95,11 @@ namespace CompactJson
                 mParent.Number(value);
             }
 
+            public void Number(ulong value)
+            {
+                mParent.Number(value);
+            }
+
             public IJsonObjectConsumer Object()
             {
                 return new TextWriterObjectJsonConsumer(mParent,  mCurrentIndentation);
@@ -190,6 +195,12 @@ namespace CompactJson
                 mParent.Number(value);
             }
 
+            public void Number(ulong value)
+            {
+                WriteItem();
+                mParent.Number(value);
+            }
+
             public IJsonObjectConsumer Object()
             {
                 WriteItem();
@@ -221,10 +232,17 @@ namespace CompactJson
 
         public void Number(double value)
         {
-            mWriter.Write(value.ToString(CultureInfo.InvariantCulture));
+            if ((value % 1) == 0)
+                mWriter.Write(value.ToString("f1", CultureInfo.InvariantCulture));
+            else
+                mWriter.Write(value.ToString(CultureInfo.InvariantCulture));
         }
 
         public void Number(long value)
+        {
+            mWriter.Write(value.ToString(CultureInfo.InvariantCulture));
+        }
+        public void Number(ulong value)
         {
             mWriter.Write(value.ToString(CultureInfo.InvariantCulture));
         }

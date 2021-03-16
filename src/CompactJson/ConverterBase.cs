@@ -110,6 +110,20 @@ namespace CompactJson
         }
 
         /// <summary>
+        /// Is invoked by a parser or another producer whenever an unsigned integer
+        /// value was parsed/produced.
+        /// 
+        /// This implementation in <see cref="ConverterBase"/> casts the unsigned
+        /// integer to a signed integer and passes it to the other FromNumber overload.
+        /// </summary>
+        /// <param name="value">The unsigned integer value.</param>
+        /// <returns>The resulting .NET object.</returns>
+        public virtual object FromNumber(ulong value)
+        {
+            return FromNumber((long)value);
+        }
+
+        /// <summary>
         /// Is invoked by a parser or another producer whenever an object
         /// begins. This method must return an object consumer which
         /// is used to pass the property data of the object. Once, there are 

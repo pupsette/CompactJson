@@ -211,12 +211,16 @@ namespace CompactJson
 
         void IJsonConsumer.Number(double value)
         {
-            mPropertiesOrdered.Add(new KeyValuePair<string, JsonValue>(mPropertyNameFromConsumer, new JsonFloat(value)));
+            mPropertiesOrdered.Add(new KeyValuePair<string, JsonValue>(mPropertyNameFromConsumer, new JsonNumber(value)));
         }
 
         void IJsonConsumer.Number(long value)
         {
-            mPropertiesOrdered.Add(new KeyValuePair<string, JsonValue>(mPropertyNameFromConsumer, new JsonLong(value)));
+            mPropertiesOrdered.Add(new KeyValuePair<string, JsonValue>(mPropertyNameFromConsumer, new JsonNumber(value)));
+        }
+        void IJsonConsumer.Number(ulong value)
+        {
+            mPropertiesOrdered.Add(new KeyValuePair<string, JsonValue>(mPropertyNameFromConsumer, new JsonNumber(value)));
         }
 
         void IJsonConsumer.String(string value)
