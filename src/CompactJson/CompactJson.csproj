@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>CompactJson</PackageId>
-    <PackageLicenseUrl>https://mit-license.org/</PackageLicenseUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <DefineConstants>COMPACTJSON_PUBLIC</DefineConstants>
     <TargetFrameworks>netstandard2.0;net452;net462</TargetFrameworks>
     <Title>Fast and lightweight JSON serializer for .NET</Title>
@@ -20,7 +20,7 @@
 
   <PropertyGroup Condition="'$(Configuration)' == 'Sources'">
     <NuspecFile>CompactJson.Source.nuspec</NuspecFile>
-    <NuspecProperties>version=$(Version);authors=$(Authors);projectUrl=$(PackageProjectUrl);repository=$(RepositoryUrl);licenseUrl=$(PackageLicenseUrl)</NuspecProperties>
+    <NuspecProperties>version=$(Version);authors=$(Authors);projectUrl=$(PackageProjectUrl);repository=$(RepositoryUrl);licenseExpr=$(PackageLicenseExpression)</NuspecProperties>
   </PropertyGroup>
 
 </Project>

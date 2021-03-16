@@ -4,7 +4,7 @@
     <id>CompactJson.Sources</id>
     <version>$version$</version>
     <authors>$authors$</authors>
-    <licenseUrl>$licenseUrl$</licenseUrl>
+    <license type="expression">$licenseExpr$</license>
     <projectUrl>$projectUrl$</projectUrl>
     <repository type="git" url="$repository$"></repository>
     <title>Fast and lightweight JSON serializer source code for embedding in C# projects</title>
