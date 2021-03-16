@@ -38,15 +38,15 @@ namespace CompactJson.Tests
             sb.Append("}");
             Console.WriteLine(sb);
             NonPublicProperty obj = Serializer.Parse<NonPublicProperty>(sb.ToString());
-            Assert.That(obj.NonPublic1, Is.EqualTo("1"));
+            Assert.That(obj.NonPublic1, Is.EqualTo("123"));
             Assert.That(obj.GetNonPublic2(), Is.EqualTo("2"));
             Assert.That(obj.NonPublic3, Is.EqualTo("3"));
             Assert.That(obj.GetNonPublic4(), Is.EqualTo("4"));
-            Assert.That(obj.NonPublic5, Is.EqualTo("5"));
+            Assert.That(obj.NonPublic5, Is.EqualTo("123"));
             Assert.That(obj.NonPublic6, Is.EqualTo("6"));
 
             string json = Serializer.ToString(new NonPublicProperty(), false);
-            Assert.That(json, Is.EqualTo("{}"));
+            Assert.That(json, Is.EqualTo("{\"NonPublic1\":\"1\",\"NonPublic5\":\"5\"}"));
         }
 
         private class NonPublicPropertyAttributed
