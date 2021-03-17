@@ -9,12 +9,12 @@ namespace CompactJson.Tests
         // test classes
         private class TestClass
         {
+            [JsonSuppressDefaultValue]
             public int Number { get; set; }
         }
 
         private class TestClassEmitDefault : TestClass
         {
-            [EmitDefaultValue]
             public int DefNumber { get; set; }
         }
 
@@ -25,7 +25,7 @@ namespace CompactJson.Tests
 
         private class TestClassEmitNullableDefault : TestClass
         {
-            [EmitDefaultValue]
+            [JsonEmitNullValue]
             public int? DefNumber { get; set; }
         }
 

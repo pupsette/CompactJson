@@ -16,7 +16,8 @@ namespace CompactJson
             public Func<object, object> Getter;
             public IConverter Converter;
             public object DefaultValue;
-            public bool EmitDefaultValue;
+            public bool SuppressDefaultValue;
+            public bool EmitNullValue;
         }
 
         private readonly Dictionary<string, PropInfo> mProps = new Dictionary<string, PropInfo>();
@@ -39,7 +40,8 @@ namespace CompactJson
                 Getter = getter,
                 Converter = converter,
                 DefaultValue = GetDefaultValue(propertyType),
-                EmitDefaultValue = EmitDefaultValue(memberInfo)
+                SuppressDefaultValue = SuppressDefaultValue(memberInfo),
+                EmitNullValue = EmitNullValue(memberInfo)
             });
         }
 
@@ -242,9 +244,14 @@ namespace CompactJson
         {
         }
 
-        private static bool EmitDefaultValue(MemberInfo memberInfo)
+        private static bool SuppressDefaultValue(MemberInfo memberInfo)
         {
-            return memberInfo.GetCustomAttribute<EmitDefaultValueAttribute>() != null;
+            return memberInfo.IsDefined(typeof(JsonSuppressDefaultValueAttribute));
+        }
+
+        private static bool EmitNullValue(MemberInfo memberInfo)
+        {
+            return memberInfo.IsDefined(typeof(JsonEmitNullValueAttribute));
         }
 
         public override object FromNull()
@@ -509,7 +516,12 @@ namespace CompactJson
             foreach (var property in mPropList)
             {
                 object propValue = property.Getter(value);
-                if (!property.EmitDefaultValue && Equals(propValue, property.DefaultValue))
+                if (propValue == null)
+                {
+                    if (!property.EmitNullValue)
+                        continue;
+                }
+                else if (property.SuppressDefaultValue && Equals(propValue, property.DefaultValue))
                     continue;
 
                 objConsumer.PropertyName(property.Name);

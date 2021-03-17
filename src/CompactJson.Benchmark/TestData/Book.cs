@@ -5,7 +5,7 @@ namespace CompactJson.Benchmark.TestData
 {
     class Book
     {
-        [CompactJson.EmitDefaultValue]
+        [JsonEmitNullValue]
         public string Title { get; set; }
 
         [Newtonsoft.Json.JsonProperty(DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore)]
@@ -14,7 +14,7 @@ namespace CompactJson.Benchmark.TestData
         [Newtonsoft.Json.JsonProperty(DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore)]
         public DateTime? LastOrdered { get; set; }
 
-        [EmitDefaultValue]
+        [JsonEmitNullValue]
         [Newtonsoft.Json.JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
         public Category Category { get; set; }
 
@@ -24,10 +24,9 @@ namespace CompactJson.Benchmark.TestData
         [Newtonsoft.Json.JsonProperty(DefaultValueHandling = Newtonsoft.Json.DefaultValueHandling.Ignore)]
         public List<string> Chapters { get; set; }
 
-        [EmitDefaultValue]
         public DateTime Publication { get; set; }
 
-        [EmitDefaultValue]
+        [JsonEmitNullValue]
         public Author[] Authors { get; set; }
 
         public static readonly Book[] BOOKS = new Book[]

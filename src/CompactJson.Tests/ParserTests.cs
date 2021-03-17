@@ -113,6 +113,7 @@ namespace CompactJson.Tests
         [TestCase(" true_ ")]
         [TestCase(" TRUE ")]
         [TestCase(" true false ")]
+        [TestCase(" trueMan ")]
         [TestCase(" 1 4 ")]
         [TestCase("\"\n\"")]
         [TestCase("\" \\o \"")]
