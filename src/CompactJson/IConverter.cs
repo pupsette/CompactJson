@@ -15,7 +15,7 @@ namespace CompactJson
         /// <summary>
         /// The .NET type which is handled by this converter. This
         /// is not needed, if this converter implementation was bound to a
-        /// property or class using the <see cref="CustomConverterAttribute"/>.
+        /// property or class using the <see cref="JsonCustomConverterAttribute"/>.
         /// </summary>
         Type Type { get; }
 

@@ -7,10 +7,10 @@ namespace CompactJson
     /// into JSON objects.
     /// This is helpful to support serialization and deserialization
     /// of class hierarchies.
-    /// If class 'A' is base class of class 'B' you may add <see cref="TypeNameAttribute"/>s
+    /// If class 'A' is base class of class 'B' you may add <see cref="JsonTypeNameAttribute"/>s
     /// to class 'A' to assign names to these classes.
     /// Additionally, add the <see cref="TypedConverterFactory"/> using the
-    /// <see cref="CustomConverterAttribute"/>.
+    /// <see cref="JsonCustomConverterAttribute"/>.
     /// </summary>
 #if COMPACTJSON_PUBLIC
     public
@@ -28,7 +28,7 @@ namespace CompactJson
         /// the given type; false, otherwise.</returns>
         public bool CanConvert(Type type)
         {
-            return TypeNameAttribute.GetKnownTypes(type) != null;
+            return JsonTypeNameAttribute.GetKnownTypes(type) != null;
         }
 
         /// <summary>

@@ -59,7 +59,7 @@ namespace CompactJson.Tests
         // test classes
         private class TestClass
         {
-            [CustomConverter(typeof(HexNumberConverter))]
+            [JsonCustomConverter(typeof(HexNumberConverter))]
             public int Number { get; set; }
         }
 

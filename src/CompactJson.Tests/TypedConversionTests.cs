@@ -7,9 +7,9 @@ namespace CompactJson.Tests
     [TestFixture]
     public class TypedConversionTests
     {
-        [TypeName(typeof(DerivedDefaultClass), null)]
-        [TypeName(typeof(DerivedC), "C")]
-        [CustomConverter(typeof(TypedConverterFactory), "TT")]
+        [JsonTypeName(typeof(DerivedDefaultClass), null)]
+        [JsonTypeName(typeof(DerivedC), "C")]
+        [JsonCustomConverter(typeof(TypedConverterFactory), "TT")]
         public abstract class AbstractBaseClassWithDefault
         {
             public string TheBase;
@@ -25,10 +25,10 @@ namespace CompactJson.Tests
             public string B;
         }
 
-        [TypeName(typeof(BaseClass), "BASE")]
-        [TypeName(typeof(DerivedA), "A")]
-        [TypeName(typeof(DerivedB), "B")]
-        [CustomConverter(typeof(TypedConverterFactory), "_typilo_")]
+        [JsonTypeName(typeof(BaseClass), "BASE")]
+        [JsonTypeName(typeof(DerivedA), "A")]
+        [JsonTypeName(typeof(DerivedB), "B")]
+        [JsonCustomConverter(typeof(TypedConverterFactory), "_typilo_")]
         public class BaseClass
         {
             public string TheBase;

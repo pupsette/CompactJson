@@ -10,7 +10,7 @@ namespace CompactJson
     /// to .NET classes in case type information has to be encoded
     /// in JSON data by using the <see cref="TypedConverter"/>.
     /// 
-    /// The <see cref="TypeNameAttribute"/> has to be added multiple
+    /// The <see cref="JsonTypeNameAttribute"/> has to be added multiple
     /// times to the base class. Once for each sub class, it should support.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
@@ -19,10 +19,10 @@ namespace CompactJson
 #else
     internal
 #endif
-    class TypeNameAttribute : Attribute
+    class JsonTypeNameAttribute : Attribute
     {
         /// <summary>
-        /// Instantiates a <see cref="TypeNameAttribute"/>.
+        /// Instantiates a <see cref="JsonTypeNameAttribute"/>.
         /// </summary>
         /// <param name="type">The known type for which to assign a type name.</param>
         /// <param name="typeName">The type name to assign. This can be left null for 
@@ -30,7 +30,7 @@ namespace CompactJson
         /// default type. This default type will be deserialized, if the type property 
         /// is missing in the source JSON. The type name will also not be 
         /// serialized for the default type.</param>
-        public TypeNameAttribute(Type type, string typeName)
+        public JsonTypeNameAttribute(Type type, string typeName)
         {
             Type = type;
             TypeName = typeName;
@@ -52,20 +52,20 @@ namespace CompactJson
         /// </summary>
         public bool IsDefaultType { get => TypeName == null; }
 
-        internal static TypeNameAttribute[] GetKnownTypes(Type type)
+        internal static JsonTypeNameAttribute[] GetKnownTypes(Type type)
         {
-            IEnumerable<TypeNameAttribute> atts = type.GetCustomAttributes<TypeNameAttribute>(true);
+            IEnumerable<JsonTypeNameAttribute> atts = type.GetCustomAttributes<JsonTypeNameAttribute>(true);
             if (atts == null)
                 return null;
 
-            TypeNameAttribute[] result = atts.ToArray();
+            JsonTypeNameAttribute[] result = atts.ToArray();
             if (result.Length == 0)
                 return null;
 
-            foreach (TypeNameAttribute att in atts)
+            foreach (JsonTypeNameAttribute att in atts)
             {
                 if (att.Type == null)
-                    throw new Exception($"{nameof(Type)} must not be null in {nameof(TypeNameAttribute)} for type {type.Name}.");
+                    throw new Exception($"{nameof(Type)} must not be null in {nameof(JsonTypeNameAttribute)} for type {type.Name}.");
             }
             return result;
         }

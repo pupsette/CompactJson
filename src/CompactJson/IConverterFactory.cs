@@ -4,7 +4,7 @@ namespace CompactJson
 {
     /// <summary>
     /// An interface for converter factories. Implementing classes may be
-    /// used together with the <see cref="CustomConverterAttribute"/>.
+    /// used together with the <see cref="JsonCustomConverterAttribute"/>.
     /// </summary>
 #if COMPACTJSON_PUBLIC
     public

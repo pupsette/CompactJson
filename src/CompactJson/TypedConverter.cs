@@ -8,10 +8,10 @@ namespace CompactJson
     /// into JSON objects.
     /// This is helpful to support serialization and deserialization
     /// of class hierarchies.
-    /// If class 'A' is base class of class 'B' you may add <see cref="TypeNameAttribute"/>s
+    /// If class 'A' is base class of class 'B' you may add <see cref="JsonTypeNameAttribute"/>s
     /// to class 'A' to assign names to these classes.
     /// Additionally, add the <see cref="TypedConverterFactory"/> using the
-    /// <see cref="CustomConverterAttribute"/>.
+    /// <see cref="JsonCustomConverterAttribute"/>.
     /// </summary>
 #if COMPACTJSON_PUBLIC
     public
@@ -26,7 +26,7 @@ namespace CompactJson
 
         /// <summary>
         /// Initializes a new <see cref="TypedConverter"/> with the given type.
-        /// <see cref="TypeNameAttribute"/>s must be present at the given type.
+        /// <see cref="JsonTypeNameAttribute"/>s must be present at the given type.
         /// </summary>
         /// <param name="type">The base type.</param>
         /// <param name="typeProperty">The name of the JSON property which should
@@ -38,7 +38,7 @@ namespace CompactJson
 
         /// <summary>
         /// Initializes a new <see cref="TypedConverter"/> with the given type.
-        /// The given type name resolver removes the need for <see cref="TypeNameAttribute"/>s
+        /// The given type name resolver removes the need for <see cref="JsonTypeNameAttribute"/>s
         /// to be present.
         /// </summary>
         /// <param name="type">The base type.</param>
@@ -115,9 +115,9 @@ namespace CompactJson
 
         private static ITypeNameResolver CreateTypeNameResolverFromAttributes(Type type)
         {
-            TypeNameAttribute[] attributes = TypeNameAttribute.GetKnownTypes(type);
+            JsonTypeNameAttribute[] attributes = JsonTypeNameAttribute.GetKnownTypes(type);
             if (attributes == null)
-                throw new Exception($"Type {type} is not supported by {nameof(TypedConverter)} due to missing {nameof(TypeNameAttribute)}s.");
+                throw new Exception($"Type {type} is not supported by {nameof(TypedConverter)} due to missing {nameof(JsonTypeNameAttribute)}s.");
 
             Type baseType = FindBaseClass(type);
 
@@ -125,7 +125,7 @@ namespace CompactJson
             foreach (var attribute in attributes)
             {
                 if (!baseType.IsAssignableFrom(attribute.Type))
-                    throw new Exception($"Type '{attribute.Type}' cannot be assigned a name using the {nameof(TypeNameAttribute)} because it does not inherit from '{type}'.");
+                    throw new Exception($"Type '{attribute.Type}' cannot be assigned a name using the {nameof(JsonTypeNameAttribute)} because it does not inherit from '{type}'.");
 
                 if (attribute.TypeName == null)
                 {
@@ -144,7 +144,7 @@ namespace CompactJson
         {
             while (type != null && type != typeof(object))
             {
-                CustomConverterAttribute attr = (CustomConverterAttribute)Attribute.GetCustomAttribute(type, typeof(CustomConverterAttribute), false);
+                JsonCustomConverterAttribute attr = (JsonCustomConverterAttribute)Attribute.GetCustomAttribute(type, typeof(JsonCustomConverterAttribute), false);
                 if (attr != null && attr.ConverterType == typeof(TypedConverterFactory))
                     return type;
 

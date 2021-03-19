@@ -27,7 +27,7 @@ namespace CompactJson
         private void AddProperty(MemberInfo memberInfo, Func<object, object> getter, Action<object, object> setter, Type propertyType)
         {
             // check, if a custom converter has been assigned
-            Type converterType = CustomConverterAttribute.GetConverterType(memberInfo, out object[] converterParameters);
+            Type converterType = JsonCustomConverterAttribute.GetConverterType(memberInfo, out object[] converterParameters);
             IConverter converter = ConverterFactoryHelper.CreateConverter(converterType, propertyType, converterParameters);
 
             // check, if a custom property name should be used

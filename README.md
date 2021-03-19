@@ -112,7 +112,7 @@ There are converters already registered for the following types:
 * `string`
 * `int` / `uint`
 * `long` / `ulong`
-* `float`
+* `float` ("NaN", "Infinity" and "-Infinity" are encoded as strings)
 * `double` ("NaN", "Infinity" and "-Infinity" are encoded as strings)
 * `char`
 * `bool`
@@ -157,9 +157,9 @@ class User
 }
 ```
 
-### Default Values
+### Null and Default Values
 
-During serialization, default values will not be emitted by default. If you want to serialize a property or field in any case, you need to add the `[EmitDefaultValue]` attribute to it.
+During serialization, null values will not be emitted, by default. Default values other than `null` will be emitted (e.g. 0 for an int). If you want to serialize a property or field in any case, you need to add the `[JsonEmitNullValue]` attribute to it. If you don't want to serialize the default value of a property or field, you need to add the `[JsonSuppressDefaultValue]` attribute.
 
 For example, consider the following class:
 ```csharp
@@ -168,6 +168,7 @@ class User
     public string Name { get; set; }
     public string EMail { get; set; }
     public string Phone { get; set; }
+	public int Age { get; set; }
 }
 ```
 If this one gets default-constructed and serialized
@@ -176,17 +177,19 @@ string json = Serializer.ToString(new User());
 ```
 the resulting JSON will look like this:
 ```
-{}
+{"Age":0}
 ```
 
-Adding the `[EmitDefaultValue]` attribute changes the behavior.
+Adding the `[JsonEmitNullValue]` and `[JsonSuppressDefaultValue]` attributes changes the behavior.
 ```csharp
 class User
 {
-    [EmitDefaultValue]
+    [JsonEmitNullValue]
     public string Name { get; set; }
     public string EMail { get; set; }
     public string Phone { get; set; }
+	[JsonSuppressDefaultValue]
+	public int Age { get; set; }
 }
 ```
 now, serialization yields:
@@ -194,7 +197,7 @@ now, serialization yields:
 {"Name":null}
 ```
 
-:heavy_exclamation_mark: Note, that _default_ values are the language defined default values, which can be obtained by the `default` keyword in C#. Property and field initialization (e.g. from your constructor) does not define the _default_ value.
+:heavy_exclamation_mark: Note, that _default_ values are the language defined default values, which can be obtained by the `default` keyword in C#. Property and field initialization (e.g. from your constructor) does not define the _default_ value. Also the `[System.ComponentModel.DefaultValue]` attribute is not considered, currently.
 
 ### Including Type Information
 
@@ -219,9 +222,9 @@ The JSON probably looks like this:
 JSON objects don't carry type information, unless it has been added explicitly. In this example we want the deserializer to choose the .NET class according to the `Type` property. In order to do so, we must add attributes for assigning the type names as well as using the `TypedConverterFactory`. Like this:
 
 ```csharp
-[TypeName(typeof(ServiceConfiguration), "Service")]
-[TypeName(typeof(LogConfiguration), "Log")]
-[CustomConverter(typeof(TypedConverterFactory), "Type")]
+[JsonTypeName(typeof(ServiceConfiguration), "Service")]
+[JsonTypeName(typeof(LogConfiguration), "Log")]
+[JsonCustomConverter(typeof(TypedConverterFactory), "Type")]
 class ConfigurationBase
 {
     public string Name { get; set; }
@@ -246,13 +249,13 @@ Of course, serialization works the same way:
 string json = Serializer.ToString(configs);
 ```
 
-The name of the JSON property, which is used to encode the type name can be chosen as a parameter of the `TypedConverterFactory` in the `[CustomConverterAttribute]`. Note, that this property must always appear as first property in the JSON object. Also, the classes themselves should not have a property with the same name.
+The name of the JSON property, which is used to encode the type name can be chosen as a parameter of the `TypedConverterFactory` in the `[JsonCustomConverterAttribute]`. Note, that this property must always appear as first property in the JSON object. Also, the classes themselves should not have a property with the same name.
 
 This example excludes the base type from serialization, because we did not assign a type name. Also there is no reflection involved, trying to determine all sub classes! Only the type name assignments at your base class makes the type visible to the serializer.
 
 If your application determines supported types at run-time you can create a custom converter factory, which creates a `TypedConverter` by passing your own implementation of `ITypeNameResolver`.
 
-One of the `[TypeName]` attributes may set the name parameter to `null` (e.g. `[TypeName(typeof(LogConfiguration), null)]`). This type is then deserialized in case the type property is missing. Also when serializing this type, the type property will not be emitted.
+One of the `[JsonTypeName]` attributes may set the name parameter to `null` (e.g. `[JsonTypeName(typeof(LogConfiguration), null)]`). This type is then deserialized in case the type property is missing. Also when serializing this type, the type property will not be emitted.
 
 ## DateTime Formatting
 

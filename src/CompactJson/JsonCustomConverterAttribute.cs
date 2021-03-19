@@ -16,17 +16,17 @@ namespace CompactJson
 #else
     internal
 #endif
-    class CustomConverterAttribute : Attribute
+    class JsonCustomConverterAttribute : Attribute
     {
         /// <summary>
-        /// Instantiates a <see cref="CustomConverterAttribute"/>.
+        /// Instantiates a <see cref="JsonCustomConverterAttribute"/>.
         /// </summary>
         /// <param name="converterType">The type which implements either 
         /// <see cref="IConverter"/> or <see cref="IConverterFactory"/>.</param>
         /// <param name="parameters">An optional set of parameters passed to the <see cref="IConverterFactory"/>.
         /// Note, that these parameters only work when used with a <see cref="IConverterFactory"/>. These
         /// parameters are not passed to non-default constructors of <see cref="IConverter"/>s.</param>
-        public CustomConverterAttribute(Type converterType, params object[] parameters)
+        public JsonCustomConverterAttribute(Type converterType, params object[] parameters)
         {
             ConverterType = converterType;
             ConverterParameters = parameters;
@@ -47,11 +47,11 @@ namespace CompactJson
         internal static Type GetConverterType(Type type, out object[] converterParameters)
         {
             converterParameters = null;
-            CustomConverterAttribute att = type.GetCustomAttribute<CustomConverterAttribute>(true);
+            JsonCustomConverterAttribute att = type.GetCustomAttribute<JsonCustomConverterAttribute>(true);
             if (att == null)
                 return null;
             if (att.ConverterType == null)
-                throw new Exception($"{nameof(ConverterType)} must not be null in {nameof(CustomConverterAttribute)} for type {type.Name}.");
+                throw new Exception($"{nameof(ConverterType)} must not be null in {nameof(JsonCustomConverterAttribute)} for type {type.Name}.");
             converterParameters = att.GetParameters();
             return att.ConverterType;
         }
@@ -59,11 +59,11 @@ namespace CompactJson
         internal static Type GetConverterType(MemberInfo memberInfo, out object[] converterParameters)
         {
             converterParameters = null;
-            CustomConverterAttribute att = memberInfo.GetCustomAttribute<CustomConverterAttribute>(true);
+            JsonCustomConverterAttribute att = memberInfo.GetCustomAttribute<JsonCustomConverterAttribute>(true);
             if (att == null)
                 return null;
             if (att.ConverterType == null)
-                throw new Exception($"{nameof(ConverterType)} must not be null in {nameof(CustomConverterAttribute)} for member {memberInfo.Name} of type {memberInfo.ReflectedType}.");
+                throw new Exception($"{nameof(ConverterType)} must not be null in {nameof(JsonCustomConverterAttribute)} for member {memberInfo.Name} of type {memberInfo.ReflectedType}.");
             converterParameters = att.GetParameters();
             return att.ConverterType;
         }

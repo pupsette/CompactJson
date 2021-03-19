@@ -20,7 +20,7 @@ namespace CompactJson
         /// </summary>
         /// <param name="type">The .NET type that is to be converted from and to JSON.
         /// This may be null for converter implementations which are designed to be used only in
-        /// a <see cref="CustomConverterAttribute"/>.</param>
+        /// a <see cref="JsonCustomConverterAttribute"/>.</param>
         protected ConverterBase(Type type)
         {
             Type = type;
@@ -29,7 +29,7 @@ namespace CompactJson
         /// <summary>
         /// The .NET type which is handled by this converter. This may be null
         /// for converter implementations which are designed to be used only in
-        /// a <see cref="CustomConverterAttribute"/>.
+        /// a <see cref="JsonCustomConverterAttribute"/>.
         /// </summary>
         public Type Type { get; }
 
