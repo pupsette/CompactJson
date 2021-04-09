@@ -51,5 +51,15 @@ namespace CompactJson.Tests
 
             Assert.That(output, Is.EqualTo(expectedOutput));
         }
+
+        [Test]
+        public void Convert_to_Dictionary()
+        {
+            JsonValue jsonValue = Serializer.Parse("{\"name\":\"Tertiary education\",\"id\":\"NACE/8542\"}");
+            var dict = jsonValue.ToModel<Dictionary<string, string>>();
+            Assert.That(dict.Count, Is.EqualTo(2));
+            Assert.That(dict["name"], Is.EqualTo("Tertiary education"));
+            Assert.That(dict["id"], Is.EqualTo("NACE/8542"));
+        }
     }
 }

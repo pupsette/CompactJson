@@ -11,7 +11,7 @@ namespace CompactJson
                 return false;
             Type genericTypeDef = type.GetGenericTypeDefinition();
             return (genericTypeDef == typeof(Dictionary<,>) || genericTypeDef == typeof(IDictionary<,>))
-                && genericTypeDef.GetGenericArguments()[0] == typeof(string);
+                && type.GetGenericArguments()[0] == typeof(string);
         }
 
         public IConverter Create(Type type, object[] parameters)
