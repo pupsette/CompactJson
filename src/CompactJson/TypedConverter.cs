@@ -74,6 +74,18 @@ namespace CompactJson
         }
 
         /// <summary>
+        /// Is invoked by a parser or another producer whenever a 'null'
+        /// value was parsed/produced.
+        /// 
+        /// The implementation in <see cref="TypedConverter"/> will return null.
+        /// </summary>
+        /// <returns>Returns null.</returns>
+        public override object FromNull()
+        {
+            return null;
+        }
+
+        /// <summary>
         /// Writes data of the .NET object to the given <see cref="IJsonConsumer"/>
         /// in order to convert it to a JSON string or to any other representation of
         /// JSON data.

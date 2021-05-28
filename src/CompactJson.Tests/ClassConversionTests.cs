@@ -43,6 +43,7 @@ namespace CompactJson.Tests
         }
 
         [TestCase("{ \"Number\": 5 }", typeof(TestClass), "{\"Number\":5}")]
+        [TestCase("{ \"number\": 5 }", typeof(TestClass), "{\"Number\":5}")]
         [TestCase("{ \"Number\": 0 }", typeof(TestClass), "{}")]
         [TestCase("{ \"Number\": 0, \"OtherProperty\": 109 }", typeof(TestClass), "{}")]
         [TestCase("{ \"Number\": 3, \"OtherProperty\": 109 }", typeof(TestClass), "{\"Number\":3}")]

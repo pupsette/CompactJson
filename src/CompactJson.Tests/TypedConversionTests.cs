@@ -78,6 +78,24 @@ namespace CompactJson.Tests
         }
 
         [Test]
+        public void Serialize_and_deserialize_null()
+        {
+            var container = new Container();
+            container.Objects = new List<BaseClass>();
+
+            container.Objects.Add(null);
+            container.Objects.Add(new BaseClass { TheBase = "" });
+
+            string json = Serializer.ToString(container, true);
+            Console.WriteLine(json);
+            Serializer.Parse<Container>(json);
+
+            Assert.That(container.Objects.Count, Is.EqualTo(2));
+            Assert.That(container.Objects[0], Is.Null);
+            Assert.That(container.Objects[1], Is.TypeOf<BaseClass>());
+        }
+
+        [Test]
         public void Dont_serialize_and_deserialize_type_name_for_default()
         {
             string json = Serializer.ToString(new DerivedDefaultClass { TheBase = "Base", Default = true }, false);

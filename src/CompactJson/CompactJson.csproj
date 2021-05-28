@@ -13,7 +13,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageProjectUrl>https://github.com/pupsette/CompactJson</PackageProjectUrl>
     <Authors>pupsette</Authors>
-    <Version>1.2.0</Version>
+    <Version>1.2.1</Version>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
     <Configurations>Debug;Release;Sources</Configurations>
   </PropertyGroup>

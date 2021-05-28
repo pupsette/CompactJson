@@ -20,7 +20,7 @@ namespace CompactJson
             public bool EmitNullValue;
         }
 
-        private readonly Dictionary<string, PropInfo> mProps = new Dictionary<string, PropInfo>();
+        private readonly Dictionary<string, PropInfo> mProps = new Dictionary<string, PropInfo>(StringComparer.OrdinalIgnoreCase);
         private PropInfo[] mPropList;
         private Func<object> mConstructor;
 
@@ -475,7 +475,7 @@ namespace CompactJson
                         if (mLastPropertyIndex == mPropList.Length)
                             mLastPropertyIndex = 0;
 
-                        if (pi.Name == propertyName)
+                        if (pi.Name.Equals(propertyName, StringComparison.OrdinalIgnoreCase))
                         {
                             mValidProperty = true;
                             mCurrentPropInfo = pi;
