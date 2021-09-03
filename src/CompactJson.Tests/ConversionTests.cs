@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace CompactJson.Tests
 {
@@ -30,10 +31,6 @@ namespace CompactJson.Tests
         [TestCase("158", typeof(double?), "158.0")]
         [TestCase("null", typeof(DateTime?), "null")]
         [TestCase("\"2001-05-13T00:12:22\"", typeof(DateTime?), "\"2001-05-13T00:12:22\"")]
-
-        // datetime
-        [TestCase("\"2001-05-13T00:12:22\"", typeof(DateTime), "\"2001-05-13T00:12:22\"")]
-        [TestCase("\"2001-05-13T00:12:22Z\"", typeof(DateTime), "\"2001-05-13T00:12:22Z\"")]
 
         // strings
         [TestCase("null", typeof(string), "null")]
@@ -68,6 +65,8 @@ namespace CompactJson.Tests
         [TestCase("\"2001-05-13T00:12:22+00:00\"")]
         [TestCase("\"2001-05-13T00:12:22+11:00\"")]
         [TestCase("\"2001-05-13T00:12:22+02:15\"")]
+        [TestCase("\"2001-05-13T00:12:22-02:15\"")]
+        [TestCase("\"2001-05-13T00:12:22-11:15\"")]
         [TestCase("\"2021-03-11T22:23:23.6396864+01:00\"", 640)]
         public void DateTime_with_offset_yields_correct_local_time(string input, int? expectedMillisecondsPart = null)
         {
@@ -75,12 +74,32 @@ namespace CompactJson.Tests
             if (expectedMillisecondsPart.HasValue)
                 Assert.That(time.Millisecond, Is.EqualTo(expectedMillisecondsPart.Value));
             Assert.That(time.Kind, Is.EqualTo(DateTimeKind.Local));
+
+            DateTime parsed = DateTime.Parse(input.Trim('"'), null, DateTimeStyles.RoundtripKind);
+            Assert.That(TruncateToSeconds(time), Is.EqualTo(TruncateToSeconds(parsed)));
+
             TimeSpan offset = TimeZoneInfo.Local.GetUtcOffset(time);
 
             string outputTime = Serializer.ToString(time, false);
             Console.WriteLine(outputTime);
 
-            Assert.That(outputTime, Does.EndWith("+" + offset.Hours.ToString("00") + ":" + offset.Minutes.ToString("00") + "\""));
+            if (offset < TimeSpan.Zero)
+                Assert.That(outputTime, Does.EndWith(offset.Hours.ToString("00") + ":" + offset.Minutes.ToString("00") + "\""));
+            else
+                Assert.That(outputTime, Does.EndWith("+" + offset.Hours.ToString("00") + ":" + offset.Minutes.ToString("00") + "\""));
+        }
+
+        [TestCase("\"2001-05-13T00:12:22\"")]
+        [TestCase("\"2001-05-13T00:12:22Z\"")]
+        [TestCase("\"2001-05-13T00:12:22+04:00\"")]
+        [TestCase("\"2001-05-13T00:12:22-04:00\"")]
+        public void DateTime_Conversion_to_model_and_back(string input)
+        {
+            string expectedOutput = $"\"{DateTime.Parse(input.Trim('"'), null, DateTimeStyles.RoundtripKind):yyyy-MM-ddTHH:mm:ssK}\"";
+
+            object model = Serializer.Parse(input, typeof(DateTime));
+            string output = Serializer.ToString(model, false);
+            Assert.That(output, Is.EqualTo(expectedOutput));
         }
 
         [TestCase("\"2001-05-13T00:12:22.999\"", "\"2001-05-13T00:12:22.999\"")]
@@ -119,6 +138,11 @@ namespace CompactJson.Tests
                 Console.WriteLine(ee.Message);
             }
             Assert.That(ex, Is.Not.Null);
+        }
+
+        private static DateTime TruncateToSeconds(DateTime time)
+        {
+            return time.AddTicks(-(time.Ticks % TimeSpan.TicksPerSecond));
         }
     }
 }
