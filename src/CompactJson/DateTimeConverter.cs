@@ -202,6 +202,8 @@ namespace CompactJson
                     int offsetMinutes = ParseChars(value, index + 4, 2, 10);
                     TimeSpan offset = new TimeSpan(offsetHours, offsetMinutes, 0);
 
+                    if (value[index] == '+')
+                        return dtUtc.Add(-offset).ToLocalTime();
                     return dtUtc.Add(offset).ToLocalTime();
                 }
                 else
