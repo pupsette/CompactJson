@@ -32,10 +32,11 @@ namespace CompactJson
 
             // check, if a custom property name should be used
             JsonPropertyAttribute jsonProperty = memberInfo.GetCustomAttribute<JsonPropertyAttribute>(true);
+			string propertyName = jsonProperty?.Name ?? memberInfo.Name;
 
-            mProps.Add(memberInfo.Name, new PropInfo
+            mProps.Add(propertyName, new PropInfo
             {
-                Name = jsonProperty?.Name ?? memberInfo.Name,
+                Name = propertyName,
                 Setter = setter,
                 Getter = getter,
                 Converter = converter,
