@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using System;
 using System.Collections.Generic;
+using static CompactJson.Tests.TypedConversionTests;
 
 namespace CompactJson.Tests
 {
@@ -104,6 +105,13 @@ namespace CompactJson.Tests
             Assert.That(result.TheBase, Is.EqualTo("Base"));
             Assert.That(result, Is.InstanceOf<DerivedDefaultClass>());
             Assert.That(((DerivedDefaultClass)result).Default, Is.True);
+        }
+
+        [Test]
+        public void Deserialize_empty_JSON_object_to_default_class()
+        {
+            AbstractBaseClassWithDefault parsed = Serializer.Parse<AbstractBaseClassWithDefault>("{}");
+            Assert.That(parsed, Is.InstanceOf<DerivedDefaultClass>());
         }
     }
 }

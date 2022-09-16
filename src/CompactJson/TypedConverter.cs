@@ -244,13 +244,8 @@ namespace CompactJson
                 }
                 else
                 {
-                    if (mWrappedConsumer == null)
-                    {
-                        if (mParent.mTypeNameResolver.DefaultType == null)
-                            throw new Exception($"The property '{mParent.mTypeProperty}' must be the first property in the JSON object when deserializing type '{mBaseType}'.");
-                        
-                        mWrappedConsumer = mParent.GetConverterForType(mParent.mTypeNameResolver.DefaultType).FromObject(mWhenDone);
-                    }
+                    if (mWrappedConsumer == null && !TryCreateDefaultType())
+                        throw new Exception($"The property '{mParent.mTypeProperty}' must be the first property in the JSON object when deserializing type '{mBaseType}'.");
                 }
 
                 mWrappedConsumer.PropertyName(propertyName);
@@ -258,7 +253,7 @@ namespace CompactJson
 
             public void Done()
             {
-                if (mWrappedConsumer == null)
+                if (mWrappedConsumer == null && !TryCreateDefaultType())
                     throw new Exception($"The property '{mParent.mTypeProperty}' must be present in the JSON object when deserializing type '{mBaseType}'.");
 
                 mWrappedConsumer.Done();
@@ -268,6 +263,15 @@ namespace CompactJson
             {
                 if (mWrappedConsumer == null)
                     throw new Exception($"The property '{mParent.mTypeProperty}' must be a string when deserializing type '{mBaseType}'.");
+            }
+
+            private bool TryCreateDefaultType()
+            {
+                if (mParent.mTypeNameResolver.DefaultType == null)
+                    return false;
+
+                mWrappedConsumer = mParent.GetConverterForType(mParent.mTypeNameResolver.DefaultType).FromObject(mWhenDone);
+                return true;
             }
         }
 
