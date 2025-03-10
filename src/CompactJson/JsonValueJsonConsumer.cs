@@ -1,4 +1,6 @@
-﻿namespace CompactJson
+﻿#pragma warning disable CS8625,CS8618
+
+namespace CompactJson
 {
     /// <summary>
     /// <see cref="IJsonConsumer"/> implementation which consumes

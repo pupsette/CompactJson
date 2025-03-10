@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.Serialization;
+#pragma warning disable CS8600,CS8603,CS8604,CS8618
 
 namespace CompactJson
 {

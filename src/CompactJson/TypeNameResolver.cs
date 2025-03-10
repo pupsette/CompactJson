@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+#pragma warning disable CS8604,CS8618,CS8625
 
 namespace CompactJson
 {

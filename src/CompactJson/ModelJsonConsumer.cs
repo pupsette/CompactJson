@@ -1,4 +1,6 @@
-﻿namespace CompactJson
+﻿#pragma warning disable CS8603,CS8618,CS8625
+
+namespace CompactJson
 {
     internal class ModelJsonConsumer : IJsonConsumer
     {

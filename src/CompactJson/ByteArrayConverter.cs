@@ -1,4 +1,6 @@
-﻿namespace CompactJson
+﻿#pragma warning disable CS8603
+
+namespace CompactJson
 {
     /// <summary>
     /// A converter for converting byte arrays to base64 encoded

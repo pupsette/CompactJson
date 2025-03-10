@@ -1,4 +1,5 @@
 ﻿using System;
+#pragma warning disable CS8603
 
 namespace CompactJson
 {

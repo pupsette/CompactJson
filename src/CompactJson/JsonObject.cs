@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+#pragma warning disable CS8618,CS8625
 
 namespace CompactJson
 {
