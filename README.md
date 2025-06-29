@@ -131,7 +131,7 @@ There are converters already registered for the following types:
 ### Properties and Fields
 For converting from JSON to custom .NET classes and back there are a few rules, that are applied to the fields and properties of the custom class. The following members will be included during serialization/deserialization:
 1. All public fields
-2. All public properties (with getter and setter, getter must be public)
+2. All properties with a public getter
 3. Properties and fields with the `[JsonProperty]` attribute
 
 The property or field name is kept as-is. If you want to use a different name when converting to JSON, you have to assign it using the `[JsonProperty("myCustomName")]` attribute.
@@ -168,7 +168,7 @@ class User
     public string Name { get; set; }
     public string EMail { get; set; }
     public string Phone { get; set; }
-	public int Age { get; set; }
+    public int Age { get; set; }
 }
 ```
 If this one gets default-constructed and serialized

@@ -24,7 +24,7 @@ namespace CompactJson.Tests
         }
 
         [Test]
-        public void Non_public_properties_are_ignored()
+        public void Parsing_into_property_with_missing_setter_should_fail()
         {
             StringBuilder sb = new StringBuilder("{");
             for (int i = 1; i <= 7; i++)
@@ -37,16 +37,9 @@ namespace CompactJson.Tests
             }
             sb.Append("}");
             Console.WriteLine(sb);
-            NonPublicProperty obj = Serializer.Parse<NonPublicProperty>(sb.ToString());
-            Assert.That(obj.NonPublic1, Is.EqualTo("123"));
-            Assert.That(obj.GetNonPublic2(), Is.EqualTo("2"));
-            Assert.That(obj.NonPublic3, Is.EqualTo("3"));
-            Assert.That(obj.GetNonPublic4(), Is.EqualTo("4"));
-            Assert.That(obj.NonPublic5, Is.EqualTo("123"));
-            Assert.That(obj.NonPublic6, Is.EqualTo("6"));
 
-            string json = Serializer.ToString(new NonPublicProperty(), false);
-            Assert.That(json, Is.EqualTo("{\"NonPublic1\":\"1\",\"NonPublic5\":\"5\"}"));
+            Action action = () => Serializer.Parse<NonPublicProperty>(sb.ToString());
+            Assert.That(action, Throws.Exception);
         }
 
         private class NonPublicPropertyAttributed

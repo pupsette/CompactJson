@@ -95,6 +95,16 @@ namespace CompactJson.Tests
             Assert.That(container.Objects[0], Is.Null);
             Assert.That(container.Objects[1], Is.TypeOf<BaseClass>());
         }
+        
+        [Test]
+        public void Serialize_anonymous_type()
+        {
+            object anonymousObject = new { A = 1 };
+            string json = Serializer.ToString(anonymousObject, false);
+            Console.WriteLine(json);
+
+            Assert.That(json, Is.EqualTo("{\"A\":1}"));
+        }
 
         [Test]
         public void Dont_serialize_and_deserialize_type_name_for_default()

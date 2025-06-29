@@ -90,13 +90,12 @@ namespace CompactJson
 
         private static bool FieldQualifies(FieldInfo field)
         {
-            bool autoInclude = (field.IsPublic && !field.IsInitOnly);
-            return MemberQualifies(field, autoInclude);
+            return MemberQualifies(field, field.IsPublic);
         }
 
         private static bool PropertyQualifies(PropertyInfo property)
         {
-            bool autoInclude = (property.GetSetMethod(true) != null) && (property.GetGetMethod()?.IsPublic ?? false);
+            bool autoInclude = property.GetGetMethod()?.IsPublic ?? false;
             return MemberQualifies(property, autoInclude);
         }
 
