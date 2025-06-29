@@ -16,6 +16,7 @@
     <Version>1.4.0</Version>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
     <Configurations>Debug;Release;Sources</Configurations>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <LangVersion>8.0</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -24,5 +25,9 @@
     <NuspecFile>CompactJson.Source.nuspec</NuspecFile>
     <NuspecProperties>version=$(Version);authors=$(Authors);projectUrl=$(PackageProjectUrl);repository=$(RepositoryUrl);licenseExpr=$(PackageLicenseExpression)</NuspecProperties>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup>
 
 </Project>
